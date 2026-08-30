@@ -1,0 +1,56 @@
+project:
+  name: deepfake_hybrid_detection
+  mode: full
+
+dataset:
+  base_dir: "data"
+
+catalog:
+  file: "dataset_inventory.csv"
+
+frames:
+  output_dir: "data/ExtractedFrames"
+  frames_per_video: 25
+
+regions:
+  input_dir: "data/ExtractedFrames"
+  output_dir: "data/MultiRegionFrames"
+
+  save_full_frame: true
+  save_face_crop: true
+  save_expanded_face: true
+
+features:
+  handcrafted:
+    input_log: "data/MultiRegionFrames/multi_region_extraction_log.csv"
+    frame_output: "features/handcrafted/handcrafted_frame_features.csv"
+    video_output: "features/handcrafted/handcrafted_video_features.csv"
+
+    lbp: true
+    glcm: true
+    dct: true
+    color: true
+    edge: true
+
+  cnn_features:
+    model: "mobilenetv2"
+    input_size: 224
+    weights: "imagenet"
+    pooling: "avg"
+
+    regions:
+      - full
+      - face
+      - expanded
+
+    input_dir: "data/MultiRegionFrames"
+    output_dir: "features/CNNFeatures"
+
+  metadata:
+    catalog: "dataset_inventory.csv"
+    output: "features/metadata/metadata_features.csv"
+
+preprocessing:
+  resize_width: 224
+  resize_height: 224
+  expanded_face_scale: 1.5

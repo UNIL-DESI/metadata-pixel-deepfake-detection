@@ -1,0 +1,22 @@
+# =========================================================================================
+# ⚠️ AI AGENT INSTRUCTIONS (JOULES / CURSOR) ⚠️
+# Configuration pour Cluster-CI.
+#
+# REQUIRED_RAM: Contrainte de placement RAM (ex: 16GB). Défaut: 2GB.
+# REQUIRED_VRAM: Contrainte de placement VRAM GPU (ex: 24GB). Défaut: 0.
+# MAX_RUNTIME_HOURS: Durée maximale du job (max 24h). OBLIGATOIRE.
+# EXPOSED_PORT: Port à exposer (ex: 8501). Active le routage pour une interface web.
+#
+# Liste ensuite les stages DVC à exécuter (un par ligne ou séparés par des espaces).
+# Laisse vide après les variables pour tout exécuter (dvc repro).
+# =========================================================================================
+# ── Resource Requirements ──
+REQUIRED_RAM=16GB
+REQUIRED_VRAM=12GB
+MAX_RUNTIME_HOURS=24
+
+# ── Execution Control ──
+STAGES=all
+
+# ── Docker ──
+DOCKER_IMAGE=docker.io/dinithikp/deepfake-hybrid-env:latest

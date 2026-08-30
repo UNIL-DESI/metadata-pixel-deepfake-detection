@@ -1,0 +1,59 @@
+project:
+  name: deepfake_hybrid_detection
+  mode: pilot
+
+dataset:
+  base_dir: "G:/My Drive/DeepfakeResearch"
+
+catalog:
+  file: "G:/My Drive/DeepfakeResearch/dataset_inventory.csv"
+
+frames:
+  output_dir: "G:/My Drive/DeepfakeResearch/ExtractedFrames"
+  frames_per_video: 25
+
+regions:
+  input_dir: "G:/My Drive/DeepfakeResearch/ExtractedFrames"
+  output_dir: "G:/My Drive/DeepfakeResearch/MultiRegionFrames"
+
+  save_full_frame: true
+  save_face_crop: true
+  save_expanded_face: true
+  
+features:
+  handcrafted:
+    input_log: "G:/My Drive/DeepfakeResearch/MultiRegionFrames/multi_region_extraction_log.csv"
+    frame_output: "G:/My Drive/DeepfakeResearch/features/handcrafted/handcrafted_frame_features.csv"
+    video_output: "G:/My Drive/DeepfakeResearch/features/handcrafted/handcrafted_video_features.csv"
+
+    lbp: true
+    glcm: true
+    dct: true
+    color: true
+    edge: true
+
+  cnn_features:
+    model: "mobilenetv2"
+    input_size: 224
+    weights: "imagenet"
+    pooling: "avg"
+
+    regions:
+      - full
+      - face
+      - expanded
+
+    input_dir: "G:/My Drive/DeepfakeResearch/MultiRegionFrames"
+    output_dir: "G:/My Drive/DeepfakeResearch/features/CNNFeatures"
+
+  metadata:
+    catalog: "G:/My Drive/DeepfakeResearch/dataset_inventory.csv"
+    output: "G:/My Drive/DeepfakeResearch/features/metadata/metadata_features.csv"
+
+
+preprocessing:
+  resize_width: 224
+  resize_height: 224
+  expanded_face_scale: 1.5
+
+
