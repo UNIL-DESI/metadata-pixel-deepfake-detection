@@ -1,0 +1,6 @@
+outs:
+- md5: 8563998641db0747130eff6463829f41.dir
+  size: 8245514010
+  nfiles: 2000
+  hash: md5
+  path: Hybrid_Deepfake_Dataset
