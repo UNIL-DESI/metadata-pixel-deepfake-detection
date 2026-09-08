@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Cluster-CI run logs
+.cluster-ci-logs/
