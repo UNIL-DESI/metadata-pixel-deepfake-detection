@@ -2,4 +2,4 @@
     remote = gdrive_remote
     hardlink_lock = true
 ['remote "gdrive_remote"']
-    url = gdrive://1dCp62Jh3XpW2WXR-uEQiwiwgCskpsks
+    url = gdrive://1dCp62Jh3XpW2WXR-uEQiwiwgCskpsksm
