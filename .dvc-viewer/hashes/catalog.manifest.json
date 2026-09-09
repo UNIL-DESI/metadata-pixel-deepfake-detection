@@ -1,0 +1,13 @@
+{
+  "aggregate_hash": "0860677f123c1bcba0fd930615c9e12276ef51cf73f834a6e61ff32b36b2396b",
+  "file_hashes": {
+    "scripts/run_create_catalog.py": "af8bc56473f72062c40332fd9ff88621533d4105c017e5741c62667c2d3d4026",
+    "src/data/create_catalog.py": "c71209ca552edaf5a59a4222942fd3bca83449d7c9429a5a7bd056a0b6dae70e"
+  },
+  "import_graph": {
+    "scripts/run_create_catalog.py": [
+      "src/data/create_catalog.py"
+    ],
+    "src/data/create_catalog.py": []
+  }
+}

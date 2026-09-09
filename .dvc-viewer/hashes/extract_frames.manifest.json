@@ -1,0 +1,13 @@
+{
+  "aggregate_hash": "d2eedb6c28553df267c2d19665f6cb43afe7fbab3c6dc060df44fed64f62ad1a",
+  "file_hashes": {
+    "scripts/run_extract_frames.py": "30c3d8894aaab4bc746c92a1925d790f0c32732eaa1cbb98b643f11f4b24922a",
+    "src/preprocessing/extract_frames.py": "0978172b0805d1c558f239cf4ab12fbdd15f3a080545abcaf40c1e312c58b6ac"
+  },
+  "import_graph": {
+    "scripts/run_extract_frames.py": [
+      "src/preprocessing/extract_frames.py"
+    ],
+    "src/preprocessing/extract_frames.py": []
+  }
+}

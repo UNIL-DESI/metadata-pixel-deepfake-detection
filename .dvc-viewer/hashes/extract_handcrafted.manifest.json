@@ -1,0 +1,32 @@
+{
+  "aggregate_hash": "1af3658a41db461cd629c16b641faa170f28ca245c4bc118ac533d95d9d33d6a",
+  "file_hashes": {
+    "scripts/run_extract_handcrafted_features.py": "47b47bed174b2e517a956a10ef849cb2f22880ee1d2245c33edbea68f4a30c55",
+    "src/features/common.py": "0dd3c2a66a0f5333345a2f2a4b5a5507c089bd7d0c82af0c00176174f97b3339",
+    "src/features/extract_color.py": "2f74da1986e293e261739004fea4d961716ad95bfe2a2202debb9aacc60b78ec",
+    "src/features/extract_dct.py": "47cb78b52b40f00e056ce217133dad697cb182cf4a509fb67fd3c753af388ad3",
+    "src/features/extract_edge.py": "ec9a08c0742b5a3d5fe8a7dcd8c5c406acf52dd12f96b85c6ecf9453a6aa28df",
+    "src/features/extract_glcm.py": "b9766bc9fa064eb894fffdd5b50f63d48ca7e2c7f4c61b67ffe8f291621e0fdc",
+    "src/features/extract_handcrafted.py": "ec149d3ae37c2275d861387dce557c464c8497cc37f587d196789c2da7c7b9ea",
+    "src/features/extract_lbp.py": "ff4e6d128844289585649456ac954cd632b558f435073ddd9dc57fb9baeb705c"
+  },
+  "import_graph": {
+    "scripts/run_extract_handcrafted_features.py": [
+      "src/features/extract_handcrafted.py"
+    ],
+    "src/features/common.py": [],
+    "src/features/extract_color.py": [],
+    "src/features/extract_dct.py": [],
+    "src/features/extract_edge.py": [],
+    "src/features/extract_glcm.py": [],
+    "src/features/extract_handcrafted.py": [
+      "src/features/common.py",
+      "src/features/extract_color.py",
+      "src/features/extract_dct.py",
+      "src/features/extract_edge.py",
+      "src/features/extract_glcm.py",
+      "src/features/extract_lbp.py"
+    ],
+    "src/features/extract_lbp.py": []
+  }
+}

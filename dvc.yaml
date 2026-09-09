@@ -1,148 +1,92 @@
 stages:
+  dvc-code-analysis:
+    cmd: bash .dvc-viewer/bootstrap.sh && dvc-viewer hash
+    always_changed: true
+    outs:
+    - .dvc-viewer/hashes: {cache: false}
   catalog:
     cmd: python scripts/run_create_catalog.py
-    deps:
-      - scripts/run_create_catalog.py
-    outs:
-      - dataset_inventory.csv
-
+    deps: [scripts/run_create_catalog.py, .dvc-viewer/hashes/catalog.hash]
+    outs: [dataset_inventory.csv]
   extract_frames:
     cmd: python scripts/run_extract_frames.py
-    deps:
-      - scripts/run_extract_frames.py
-      - dataset_inventory.csv
-    outs:
-      - data/ExtractedFrames/
-
+    deps: [scripts/run_extract_frames.py, dataset_inventory.csv, .dvc-viewer/hashes/extract_frames.hash]
+    outs: [data/ExtractedFrames/]
   extract_regions:
     cmd: python scripts/run_extract_multi_regions.py
-    deps:
-      - scripts/run_extract_multi_regions.py
-      - data/ExtractedFrames/
-    outs:
-      - data/MultiRegionFrames/
-
+    deps: [scripts/run_extract_multi_regions.py, data/ExtractedFrames/, .dvc-viewer/hashes/extract_regions.hash]
+    outs: [data/MultiRegionFrames/]
   extract_handcrafted:
     cmd: python scripts/run_extract_handcrafted_features.py
-    deps:
-      - scripts/run_extract_handcrafted_features.py
-      - data/MultiRegionFrames/
-    outs:
-      # Assuming this script outputs frame-level features
-      - features/handcrafted/handcrafted_frame_features.csv
-
+    deps: [scripts/run_extract_handcrafted_features.py, data/MultiRegionFrames/, .dvc-viewer/hashes/extract_handcrafted.hash]
+    outs: [features/handcrafted/handcrafted_frame_features.csv]
   aggregate_handcrafted:
     cmd: python scripts/run_aggregate_handcrafted_features.py
-    deps:
-      - scripts/run_aggregate_handcrafted_features.py
-      - features/handcrafted/handcrafted_frame_features.csv
-    outs:
-      - features/handcrafted/handcrafted_video_features.csv
-
+    deps: [scripts/run_aggregate_handcrafted_features.py, features/handcrafted/handcrafted_frame_features.csv,
+      .dvc-viewer/hashes/aggregate_handcrafted.hash]
+    outs: [features/handcrafted/handcrafted_video_features.csv]
   extract_cnn:
     cmd: python scripts/run_extract_cnn_features.py
-    deps:
-      - scripts/run_extract_cnn_features.py
-      - data/MultiRegionFrames/
-    outs:
-      # Assuming this script outputs frame-level features
-      - features/CNNFeatures/mobilenetv2_frame_features.csv
-
+    deps: [scripts/run_extract_cnn_features.py, data/MultiRegionFrames/, .dvc-viewer/hashes/extract_cnn.hash]
+    outs: [features/CNNFeatures/mobilenetv2_frame_features.csv]
   aggregate_cnn:
     cmd: python scripts/run_aggregate_cnn_features.py
-    deps:
-      - scripts/run_aggregate_cnn_features.py
-      - features/CNNFeatures/mobilenetv2_frame_features.csv
-    outs:
-      - features/CNNFeatures/mobilenetv2_video_features.csv
-
+    deps: [scripts/run_aggregate_cnn_features.py, features/CNNFeatures/mobilenetv2_frame_features.csv,
+      .dvc-viewer/hashes/aggregate_cnn.hash]
+    outs: [features/CNNFeatures/mobilenetv2_video_features.csv]
   extract_metadata:
     cmd: python scripts/run_extract_metadata.py
-    deps:
-      - scripts/run_extract_metadata.py
-      - dataset_inventory.csv
-    outs:
-      - features/metadata/raw_metadata_features.csv
-
+    deps: [scripts/run_extract_metadata.py, dataset_inventory.csv, .dvc-viewer/hashes/extract_metadata.hash]
+    outs: [features/metadata/raw_metadata_features.csv]
   analyze_metadata:
     cmd: python scripts/analyze_metadata.py
-    deps:
-      - scripts/analyze_metadata.py
-      - features/metadata/raw_metadata_features.csv
+    deps: [scripts/analyze_metadata.py, features/metadata/raw_metadata_features.csv,
+      .dvc-viewer/hashes/analyze_metadata.hash]
     metrics:
-      # Using cache: false so the cluster dashboard can track it
-      - reports/metadata_analysis.json: {cache: false}
-
+    - reports/metadata_analysis.json: {cache: false}
   preprocess_metadata:
     cmd: python scripts/preprocess_metadata.py
-    deps:
-      - scripts/preprocess_metadata.py
-      - features/metadata/raw_metadata_features.csv
-    outs:
-      - features/metadata/metadata_features.csv
-
+    deps: [scripts/preprocess_metadata.py, features/metadata/raw_metadata_features.csv,
+      .dvc-viewer/hashes/preprocess_metadata.hash]
+    outs: [features/metadata/metadata_features.csv]
   align_features:
     cmd: python scripts/run_align_features.py
-    deps:
-      - scripts/run_align_features.py
-      - features/handcrafted/handcrafted_video_features.csv
-      - features/CNNFeatures/mobilenetv2_video_features.csv
-      - features/metadata/metadata_features.csv
-    outs:
-      - features/aligned/aligned_features.csv
-
+    deps: [scripts/run_align_features.py, features/handcrafted/handcrafted_video_features.csv,
+      features/CNNFeatures/mobilenetv2_video_features.csv, features/metadata/metadata_features.csv,
+      .dvc-viewer/hashes/align_features.hash]
+    outs: [features/aligned/aligned_features.csv]
   feature_analysis:
     cmd: python scripts/run_feature_analysis.py
-    deps:
-      - scripts/run_feature_analysis.py
-      - features/aligned/aligned_features.csv
+    deps: [scripts/run_feature_analysis.py, features/aligned/aligned_features.csv,
+      .dvc-viewer/hashes/feature_analysis.hash]
     plots:
-      - reports/feature_correlation.png: {cache: false}
-
+    - reports/feature_correlation.png: {cache: false}
   split_dataset:
     cmd: python scripts/run_split_dataset.py
-    deps:
-      - scripts/run_split_dataset.py
-      - features/aligned/aligned_features.csv
-    outs:
-      - data/splits/
-
+    deps: [scripts/run_split_dataset.py, features/aligned/aligned_features.csv, .dvc-viewer/hashes/split_dataset.hash]
+    outs: [data/splits/]
   feature_selection:
     cmd: python scripts/run_feature_selection.py
-    deps:
-      - scripts/run_feature_selection.py
-      - data/splits/
-    outs:
-      - features/selected_features.pkl
-
+    deps: [scripts/run_feature_selection.py, data/splits/, .dvc-viewer/hashes/feature_selection.hash]
+    outs: [features/selected_features.pkl]
   train_models:
     cmd: python scripts/run_train_models.py
-    deps:
-      - scripts/run_train_models.py
-      - features/selected_features.pkl
-      - data/splits/
-    outs:
-      - models/
+    deps: [scripts/run_train_models.py, features/selected_features.pkl, data/splits/,
+      .dvc-viewer/hashes/train_models.hash]
+    outs: [models/]
     metrics:
-      - reports/training_metrics.json: {cache: false}
-
+    - reports/training_metrics.json: {cache: false}
   final_evaluation:
     cmd: python scripts/run_final_evaluation.py
-    deps:
-      - scripts/run_final_evaluation.py
-      - models/
-      - data/splits/
+    deps: [scripts/run_final_evaluation.py, models/, data/splits/, .dvc-viewer/hashes/final_evaluation.hash]
     metrics:
-      - reports/final_eval.json: {cache: false}
+    - reports/final_eval.json: {cache: false}
     plots:
-      - reports/confusion_matrix.png: {cache: false}
-      - reports/roc_curve.png: {cache: false}
-
+    - reports/confusion_matrix.png: {cache: false}
+    - reports/roc_curve.png: {cache: false}
   ablation_study:
     cmd: python scripts/run_ablation_study.py
-    deps:
-      - scripts/run_ablation_study.py
-      - features/aligned/aligned_features.csv
-      - data/splits/
+    deps: [scripts/run_ablation_study.py, features/aligned/aligned_features.csv, data/splits/,
+      .dvc-viewer/hashes/ablation_study.hash]
     metrics:
-      - reports/ablation_results.json: {cache: false}
+    - reports/ablation_results.json: {cache: false}

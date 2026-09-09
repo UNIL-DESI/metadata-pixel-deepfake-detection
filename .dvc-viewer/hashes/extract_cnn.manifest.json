@@ -1,0 +1,16 @@
+{
+  "aggregate_hash": "5652fef839fbb740e3fb229b79cb05b741240882d795f0e57ef82c58c584f924",
+  "file_hashes": {
+    "scripts/run_extract_cnn_features.py": "991df2e454f81f1f3852092508e45eac4cd05a297e9faa94aeffc167670ba755",
+    "src/features/cnn_feature_extractor.py": "3667b8149dec12a4aef99e80ea5c2facf84995782450124b98549d4e56381fde",
+    "src/features/cnn_models.py": "94541406360dc2dffb5dbeec3901846a2db8a5d1342a997f938887e1c4e44165"
+  },
+  "import_graph": {
+    "scripts/run_extract_cnn_features.py": [
+      "src/features/cnn_feature_extractor.py",
+      "src/features/cnn_models.py"
+    ],
+    "src/features/cnn_feature_extractor.py": [],
+    "src/features/cnn_models.py": []
+  }
+}
