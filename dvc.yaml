@@ -4,6 +4,14 @@ stages:
     always_changed: true
     outs:
     - .dvc-viewer/hashes: {cache: false}
+  prepare_dataset:
+    cmd: >-
+      curl -L "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/Deepfakes.zip" -o Deepfakes.zip &&
+      mkdir -p data/raw/Hybrid_Deepfake_Dataset &&
+      unzip -q -o Deepfakes.zip -d data/raw/Hybrid_Deepfake_Dataset &&
+      rm Deepfakes.zip
+    outs:
+      - data/raw/Hybrid_Deepfake_Dataset
   catalog:
     cmd: python scripts/run_create_catalog.py
     deps: [scripts/run_create_catalog.py, .dvc-viewer/hashes/catalog.hash]
