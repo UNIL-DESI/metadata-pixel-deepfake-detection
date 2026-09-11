@@ -1,0 +1,13 @@
+md5: bf5dc8f076002fbb0b4a043c6394042c
+frozen: true
+deps:
+- checksum: '"6dec0de8c1f76e542a797452451614d017b2b558bd814f2be86ae352088e055f"'
+  size: 8221124415
+  hash: md5
+  path: 
+    https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/Deepfakes.zip
+outs:
+- md5: 8761516b2a1da48e87067115c3f60caf
+  size: 8221124415
+  hash: md5
+  path: Deepfakes.zip
