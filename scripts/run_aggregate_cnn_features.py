@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import argparse
 from pathlib import Path
 import sys
 import yaml
@@ -17,13 +20,16 @@ from features.aggregate_cnn_features import (
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Aggregate CNN frame features to video level")
+    parser.add_argument(
+        "--config",
+        default="config/pilot.yaml",
+        help="Path to YAML configuration file"
+    )
+    args = parser.parse_args()
 
     # Load configuration
-    with open(
-        "config/pilot.yaml",
-        "r"
-    ) as f:
-
+    with open(args.config, "r") as f:
         config = yaml.safe_load(f)
 
     cnn_config = config["features"]["cnn_features"]

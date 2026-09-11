@@ -1,7 +1,9 @@
+from __future__ import annotations
+
+import argparse
 from pathlib import Path
 import sys
 import yaml
-
 
 sys.path.append(
     str(
@@ -12,49 +14,41 @@ sys.path.append(
     )
 )
 
-
 from features.aggregate_handcrafted_features import (
     aggregate_handcrafted_features
 )
 
 
-
 def main():
+    parser = argparse.ArgumentParser(description="Aggregate handcrafted frame features to video level")
+    parser.add_argument(
+        "--config",
+        default="config/pilot.yaml",
+        help="Path to YAML configuration file"
+    )
+    args = parser.parse_args()
 
-    with open(
-        "config/pilot.yaml",
-        "r"
-    ) as f:
-
+    with open(args.config, "r") as f:
         config = yaml.safe_load(f)
-
 
     handcrafted_config = (
         config["features"]["handcrafted"]
     )
 
-
     frame_csv = Path(
         handcrafted_config["frame_output"]
     )
-
 
     video_csv = Path(
         handcrafted_config["video_output"]
     )
 
-
     print("=" * 60)
     print("Handcrafted Feature Aggregation")
     print("=" * 60)
 
-
-    print(
-        "Input:"
-    )
-
+    print("Input:")
     print(frame_csv)
-
 
     video_features = (
         aggregate_handcrafted_features(
@@ -62,26 +56,19 @@ def main():
         )
     )
 
-
     video_csv.parent.mkdir(
         parents=True,
         exist_ok=True
     )
-
 
     video_features.to_csv(
         video_csv,
         index=False
     )
 
-
     print()
-    print(
-        "Saved video-level handcrafted features:"
-    )
-
+    print("Saved video-level handcrafted features:")
     print(video_csv)
-
 
     print()
     print("Summary")
@@ -95,12 +82,10 @@ def main():
         f"Output columns   : {len(video_features.columns)}"
     )
 
-
     print()
     print(
         "Handcrafted feature aggregation completed."
     )
-
 
 
 if __name__ == "__main__":

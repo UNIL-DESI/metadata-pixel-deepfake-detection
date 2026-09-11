@@ -17,9 +17,9 @@ def main():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--config",
-        default="config/pilot.yaml",
-        help="Path to YAML configuration file"
+            "--config",
+            default="pilot.yaml",
+            help="Path to the configuration file (e.g., pilot.yaml or full.yaml)"
     )
 
     parser.add_argument(

@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import argparse
 from pathlib import Path
 import sys
 import yaml
@@ -16,7 +19,6 @@ from features.cnn_feature_extractor import extract_features
 
 
 def collect_images(folder):
-
     extensions = [
         "*.jpg",
         "*.jpeg",
@@ -26,7 +28,6 @@ def collect_images(folder):
     images = []
 
     for ext in extensions:
-
         images.extend(
             Path(folder).rglob(ext)
         )
@@ -35,12 +36,15 @@ def collect_images(folder):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Extract CNN features from images")
+    parser.add_argument(
+        "--config",
+        default="config/pilot.yaml",
+        help="Path to YAML configuration file"
+    )
+    args = parser.parse_args()
 
-    with open(
-        "config/pilot.yaml",
-        "r"
-    ) as f:
-
+    with open(args.config, "r") as f:
         config = yaml.safe_load(f)
 
     cnn_config = config["features"]["cnn_features"]

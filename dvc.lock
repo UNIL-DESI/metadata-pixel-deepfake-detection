@@ -1,0 +1,10 @@
+schema: '2.0'
+stages:
+  dvc-code-analysis:
+    cmd: bash .dvc-viewer/bootstrap.sh && dvc-viewer hash
+    outs:
+    - path: .dvc-viewer/hashes
+      hash: md5
+      md5: c41b03c9e9f9f2e170a40a9d1e55f13c.dir
+      size: 9553
+      nfiles: 34

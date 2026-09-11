@@ -1,33 +1,13 @@
-"""
-run_train_models.py
+from __future__ import annotations
 
-Leakage-safe model training for the Deepfake Detection pilot dataset.
-
-Models:
-    1. Logistic Regression
-    2. Random Forest
-    3. Support Vector Machine (SVM)
-
-IMPORTANT:
-    - Training data is used for fitting.
-    - Validation data is used for model comparison.
-    - Test data is NOT used in this stage.
-
-Dataset:
-    300 videos
-    Train      = 210
-    Validation = 45
-    Test       = 45
-
-Selected features:
-    160
-"""
-
+import argparse
+from pathlib import Path
 import os
 import json
 import joblib
 import numpy as np
 import pandas as pd
+import yaml
 
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -46,54 +26,7 @@ from sklearn.metrics import (
     classification_report,
 )
 
-
-# ======================================================================
-# CONFIGURATION
-# ======================================================================
-
-BASE_DIR = r"G:\My Drive\DeepfakeResearch"
-
-SELECTED_DIR = os.path.join(
-    BASE_DIR,
-    "features",
-    "selected"
-)
-
-MODEL_DIR = os.path.join(
-    BASE_DIR,
-    "models",
-    "pilot"
-)
-
-RESULT_DIR = os.path.join(
-    BASE_DIR,
-    "results",
-    "pilot"
-)
-
-TRAIN_FILE = os.path.join(
-    SELECTED_DIR,
-    "train_selected_160.csv"
-)
-
-VALIDATION_FILE = os.path.join(
-    SELECTED_DIR,
-    "validation_selected_160.csv"
-)
-
-TEST_FILE = os.path.join(
-    SELECTED_DIR,
-    "test_selected_160.csv"
-)
-
-FEATURE_LIST_FILE = os.path.join(
-    SELECTED_DIR,
-    "selected_features_160.txt"
-)
-
-
-# Random seed for reproducibility
-RANDOM_STATE = 42
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 
 # ======================================================================
@@ -117,33 +50,13 @@ def load_dataset(path, name):
         )
 
     df = pd.read_csv(path)
-
     print(f"{name} shape: {df.shape}")
-
     return df
 
 
 def identify_columns(df):
-    """
-    Identify ID, label and feature columns.
-
-    Expected:
-        media_id
-        label
-        160 selected feature columns
-    """
-
-    id_candidates = [
-        "media_id",
-        "video_name",
-        "id"
-    ]
-
-    label_candidates = [
-        "label",
-        "target",
-        "class"
-    ]
+    id_candidates = ["media_id", "video_name", "id"]
+    label_candidates = ["label", "target", "class"]
 
     id_column = None
     label_column = None
@@ -159,18 +72,13 @@ def identify_columns(df):
             break
 
     if id_column is None:
-        raise ValueError(
-            "Could not find an identifier column."
-        )
+        raise ValueError("Could not find an identifier column.")
 
     if label_column is None:
-        raise ValueError(
-            "Could not find a label column."
-        )
+        raise ValueError("Could not find a label column.")
 
     feature_columns = [
-        col
-        for col in df.columns
+        col for col in df.columns
         if col not in [id_column, label_column]
     ]
 
@@ -178,13 +86,6 @@ def identify_columns(df):
 
 
 def convert_labels(series):
-    """
-    Convert labels into binary values.
-
-    real = 0
-    fake = 1
-    """
-
     mapping = {
         "real": 0,
         "fake": 1,
@@ -200,7 +101,6 @@ def convert_labels(series):
         unexpected = set(
             series[converted.isna()].astype(str)
         )
-
         raise ValueError(
             f"Unexpected labels found: {unexpected}"
         )
@@ -212,23 +112,18 @@ def check_dataset(df, name, id_column, label_column):
     print(f"\nChecking {name}...")
 
     if df[id_column].isna().any():
-        raise ValueError(
-            f"{name} contains missing IDs."
-        )
+        raise ValueError(f"{name} contains missing IDs.")
 
     if df[id_column].duplicated().any():
         duplicates = df[
             df[id_column].duplicated(keep=False)
         ][id_column].tolist()
-
         raise ValueError(
             f"{name} contains duplicate IDs: {duplicates[:10]}"
         )
 
     if df[label_column].isna().any():
-        raise ValueError(
-            f"{name} contains missing labels."
-        )
+        raise ValueError(f"{name} contains missing labels.")
 
     labels = convert_labels(df[label_column])
 
@@ -255,20 +150,17 @@ def check_split_overlap(train, validation, test, id_column):
 
     if train_val:
         raise ValueError(
-            f"Train/Validation overlap detected: "
-            f"{list(train_val)[:10]}"
+            f"Train/Validation overlap detected: {list(train_val)[:10]}"
         )
 
     if train_test:
         raise ValueError(
-            f"Train/Test overlap detected: "
-            f"{list(train_test)[:10]}"
+            f"Train/Test overlap detected: {list(train_test)[:10]}"
         )
 
     if val_test:
         raise ValueError(
-            f"Validation/Test overlap detected: "
-            f"{list(val_test)[:10]}"
+            f"Validation/Test overlap detected: {list(val_test)[:10]}"
         )
 
     print("✓ No ID overlap between train, validation and test.")
@@ -278,84 +170,37 @@ def check_split_overlap(train, validation, test, id_column):
 # MODEL DEFINITIONS
 # ======================================================================
 
-def create_models():
-    """
-    Create the three classical ML models.
-
-    Scaling:
-        Logistic Regression -> StandardScaler
-        SVM                  -> StandardScaler
-        Random Forest        -> no scaling required
-
-    Median imputation is included as a safety step.
-    """
-
+def create_models(random_state):
     models = {}
 
-    # --------------------------------------------------------------
-    # Logistic Regression
-    # --------------------------------------------------------------
-
     models["logistic_regression"] = Pipeline([
-        (
-            "imputer",
-            SimpleImputer(strategy="median")
-        ),
-        (
-            "scaler",
-            StandardScaler()
-        ),
-        (
-            "classifier",
-            LogisticRegression(
-                max_iter=5000,
-                random_state=RANDOM_STATE
-            )
-        )
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler()),
+        ("classifier", LogisticRegression(
+            max_iter=5000,
+            random_state=random_state
+        ))
     ])
-
-    # --------------------------------------------------------------
-    # Random Forest
-    # --------------------------------------------------------------
 
     models["random_forest"] = Pipeline([
-        (
-            "imputer",
-            SimpleImputer(strategy="median")
-        ),
-        (
-            "classifier",
-            RandomForestClassifier(
-                n_estimators=500,
-                random_state=RANDOM_STATE,
-                n_jobs=-1,
-                class_weight="balanced"
-            )
-        )
+        ("imputer", SimpleImputer(strategy="median")),
+        ("classifier", RandomForestClassifier(
+            n_estimators=500,
+            random_state=random_state,
+            n_jobs=-1,
+            class_weight="balanced"
+        ))
     ])
 
-    # --------------------------------------------------------------
-    # SVM
-    # --------------------------------------------------------------
-
     models["svm"] = Pipeline([
-        (
-            "imputer",
-            SimpleImputer(strategy="median")
-        ),
-        (
-            "scaler",
-            StandardScaler()
-        ),
-        (
-            "classifier",
-            SVC(
-                kernel="rbf",
-                probability=True,
-                random_state=RANDOM_STATE,
-                class_weight="balanced"
-            )
-        )
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler()),
+        ("classifier", SVC(
+            kernel="rbf",
+            probability=True,
+            random_state=random_state,
+            class_weight="balanced"
+        ))
     ])
 
     return models
@@ -372,57 +217,23 @@ def evaluate_model(
     model_name,
     split_name
 ):
-    """
-    Evaluate a trained model.
-
-    Returns:
-        metrics dictionary
-        predictions
-        probabilities
-    """
-
     predictions = model.predict(X)
-
     probabilities = None
 
     if hasattr(model, "predict_proba"):
         probabilities = model.predict_proba(X)[:, 1]
 
-    accuracy = accuracy_score(
-        y,
-        predictions
-    )
-
-    precision = precision_score(
-        y,
-        predictions,
-        zero_division=0
-    )
-
-    recall = recall_score(
-        y,
-        predictions,
-        zero_division=0
-    )
-
-    f1 = f1_score(
-        y,
-        predictions,
-        zero_division=0
-    )
+    accuracy = accuracy_score(y, predictions)
+    precision = precision_score(y, predictions, zero_division=0)
+    recall = recall_score(y, predictions, zero_division=0)
+    f1 = f1_score(y, predictions, zero_division=0)
 
     if probabilities is not None:
-        auc = roc_auc_score(
-            y,
-            probabilities
-        )
+        auc = roc_auc_score(y, probabilities)
     else:
         auc = np.nan
 
-    cm = confusion_matrix(
-        y,
-        predictions
-    )
+    cm = confusion_matrix(y, predictions)
 
     print()
     print("-" * 60)
@@ -470,77 +281,47 @@ def evaluate_model(
 # ======================================================================
 
 def main():
-
-    print_header(
-        "MODEL TRAINING AND VALIDATION"
+    parser = argparse.ArgumentParser(description="Leakage-safe model training and validation")
+    parser.add_argument(
+        "--config",
+        default="pilot.yaml",
+        help="Path to YAML configuration file",
     )
+    args = parser.parse_args()
 
-    print(
-        "Deepfake Detection - Pilot Dataset"
-    )
+    config_path = Path(args.config)
+    if not config_path.exists() and Path("config").joinpath(args.config).exists():
+        config_path = Path("config") / args.config
 
-    print()
-    print("Models:")
-    print("  1. Logistic Regression")
-    print("  2. Random Forest")
-    print("  3. SVM")
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
 
-    print()
-    print("IMPORTANT:")
-    print("  ✓ Training data used for model fitting")
-    print("  ✓ Validation data used for model comparison")
-    print("  ✓ Test data NOT used")
-    print("  ✓ Preprocessing fitted only on training data")
+    base_dir = config["dataset"]["base_dir"]
+    selected_dir = str(Path(base_dir) / "features" / "selected")
+    model_dir = str(Path(base_dir) / "models" / "pilot")
+    result_dir = str(Path(base_dir) / "results" / "pilot")
 
-    # ==================================================================
-    # CREATE OUTPUT DIRECTORIES
-    # ==================================================================
+    train_file = os.path.join(selected_dir, "train_selected_160.csv")
+    validation_file = os.path.join(selected_dir, "validation_selected_160.csv")
+    test_file = os.path.join(selected_dir, "test_selected_160.csv")
 
-    os.makedirs(
-        MODEL_DIR,
-        exist_ok=True
-    )
+    random_state = 42
 
-    os.makedirs(
-        RESULT_DIR,
-        exist_ok=True
-    )
+    print_header("MODEL TRAINING AND VALIDATION")
+    print("Deepfake Detection - Pilot Dataset")
 
-    # ==================================================================
-    # LOAD DATA
-    # ==================================================================
+    os.makedirs(model_dir, exist_ok=True)
+    os.makedirs(result_dir, exist_ok=True)
 
-    print_header(
-        "LOADING SELECTED FEATURES"
-    )
+    print_header("LOADING SELECTED FEATURES")
 
-    train = load_dataset(
-        TRAIN_FILE,
-        "Training"
-    )
+    train = load_dataset(train_file, "Training")
+    validation = load_dataset(validation_file, "Validation")
+    test = load_dataset(test_file, "Test")
 
-    validation = load_dataset(
-        VALIDATION_FILE,
-        "Validation"
-    )
-
-    test = load_dataset(
-        TEST_FILE,
-        "Test"
-    )
-
-    # ==================================================================
-    # IDENTIFY COLUMNS
-    # ==================================================================
-
-    id_column, label_column, train_features = \
-        identify_columns(train)
-
-    _, _, validation_features = \
-        identify_columns(validation)
-
-    _, _, test_features = \
-        identify_columns(test)
+    id_column, label_column, train_features = identify_columns(train)
+    _, _, validation_features = identify_columns(validation)
+    _, _, test_features = identify_columns(test)
 
     print("\nIdentifier column:")
     print(f"  {id_column}")
@@ -548,225 +329,68 @@ def main():
     print("\nLabel column:")
     print(f"  {label_column}")
 
-    print(
-        f"\nTraining feature count: "
-        f"{len(train_features)}"
-    )
+    print(f"\nTraining feature count: {len(train_features)}")
+    print(f"Validation feature count: {len(validation_features)}")
+    print(f"Test feature count: {len(test_features)}")
 
-    print(
-        f"Validation feature count: "
-        f"{len(validation_features)}"
-    )
-
-    print(
-        f"Test feature count: "
-        f"{len(test_features)}"
-    )
-
-    # ==================================================================
-    # CHECK FEATURE CONSISTENCY
-    # ==================================================================
-
-    print_header(
-        "CHECKING FEATURE CONSISTENCY"
-    )
+    print_header("CHECKING FEATURE CONSISTENCY")
 
     if train_features != validation_features:
         raise ValueError(
-            "Training and validation feature columns "
-            "are not identical or in the same order."
+            "Training and validation feature columns are not identical or in the same order."
         )
 
     if train_features != test_features:
         raise ValueError(
-            "Training and test feature columns "
-            "are not identical or in the same order."
+            "Training and test feature columns are not identical or in the same order."
         )
 
-    print(
-        f"✓ All splits contain the same "
-        f"{len(train_features)} features."
-    )
+    print(f"✓ All splits contain the same {len(train_features)} features.")
 
-    # ==================================================================
-    # CHECK DATA
-    # ==================================================================
+    print_header("DATA VALIDATION")
 
-    print_header(
-        "DATA VALIDATION"
-    )
+    check_dataset(train, "Training", id_column, label_column)
+    check_dataset(validation, "Validation", id_column, label_column)
+    check_dataset(test, "Test", id_column, label_column)
+    check_split_overlap(train, validation, test, id_column)
 
-    check_dataset(
-        train,
-        "Training",
-        id_column,
-        label_column
-    )
+    X_train = train[train_features]
+    X_validation = validation[train_features]
+    X_test = test[train_features]
 
-    check_dataset(
-        validation,
-        "Validation",
-        id_column,
-        label_column
-    )
+    y_train = convert_labels(train[label_column])
+    y_validation = convert_labels(validation[label_column])
+    y_test = convert_labels(test[label_column])
 
-    check_dataset(
-        test,
-        "Test",
-        id_column,
-        label_column
-    )
+    models = create_models(random_state)
 
-    check_split_overlap(
-        train,
-        validation,
-        test,
-        id_column
-    )
-
-    # ==================================================================
-    # PREPARE X AND Y
-    # ==================================================================
-
-    X_train = train[
-        train_features
-    ]
-
-    X_validation = validation[
-        train_features
-    ]
-
-    # IMPORTANT:
-    # We load test data only to verify its structure.
-    # We DO NOT use it for training or model selection.
-
-    X_test = test[
-        train_features
-    ]
-
-    y_train = convert_labels(
-        train[label_column]
-    )
-
-    y_validation = convert_labels(
-        validation[label_column]
-    )
-
-    y_test = convert_labels(
-        test[label_column]
-    )
-
-    print("\nTraining matrix:")
-    print(
-        f"  X_train: {X_train.shape}"
-    )
-
-    print(
-        f"  y_train: {y_train.shape}"
-    )
-
-    print("\nValidation matrix:")
-    print(
-        f"  X_validation: {X_validation.shape}"
-    )
-
-    print(
-        f"  y_validation: {y_validation.shape}"
-    )
-
-    print("\nTest matrix:")
-    print(
-        f"  X_test: {X_test.shape}"
-    )
-
-    print(
-        f"  y_test: {y_test.shape}"
-    )
-
-    # ==================================================================
-    # CREATE MODELS
-    # ==================================================================
-
-    models = create_models()
-
-    # Store validation results
     all_results = []
-
-    # Store validation predictions
     all_predictions = []
 
-    # ==================================================================
-    # TRAIN MODELS SEQUENTIALLY
-    # ==================================================================
-
-    print_header(
-        "TRAINING MODELS"
-    )
+    print_header("TRAINING MODELS")
 
     for model_name, model in models.items():
-
         print()
         print("=" * 70)
-        print(
-            f"TRAINING: "
-            f"{model_name.upper()}"
-        )
+        print(f"TRAINING: {model_name.upper()}")
         print("=" * 70)
 
-        # --------------------------------------------------------------
-        # TRAIN ONLY ON TRAINING DATA
-        # --------------------------------------------------------------
+        model.fit(X_train, y_train)
+        print(f"✓ {model_name} training completed.")
 
-        model.fit(
-            X_train,
-            y_train
-        )
+        model_path = os.path.join(model_dir, f"{model_name}.joblib")
+        joblib.dump(model, model_path)
+        print(f"✓ Model saved:\n  {model_path}")
 
-        print(
-            f"✓ {model_name} training completed."
-        )
-
-        # --------------------------------------------------------------
-        # SAVE MODEL
-        # --------------------------------------------------------------
-
-        model_path = os.path.join(
-            MODEL_DIR,
-            f"{model_name}.joblib"
-        )
-
-        joblib.dump(
+        metrics, predictions, probabilities = evaluate_model(
             model,
-            model_path
+            X_validation,
+            y_validation,
+            model_name,
+            "validation"
         )
 
-        print(
-            f"✓ Model saved:"
-        )
-        print(
-            f"  {model_path}"
-        )
-
-        # --------------------------------------------------------------
-        # VALIDATION
-        # --------------------------------------------------------------
-
-        metrics, predictions, probabilities = \
-            evaluate_model(
-                model,
-                X_validation,
-                y_validation,
-                model_name,
-                "validation"
-            )
-
-        all_results.append(
-            metrics
-        )
-
-        # --------------------------------------------------------------
-        # SAVE VALIDATION PREDICTIONS
-        # --------------------------------------------------------------
+        all_results.append(metrics)
 
         prediction_df = pd.DataFrame({
             "media_id": validation[id_column],
@@ -778,55 +402,25 @@ def main():
         })
 
         if probabilities is not None:
-            prediction_df[
-                "fake_probability"
-            ] = probabilities
+            prediction_df["fake_probability"] = probabilities
 
-        prediction_df[
-            "correct"
-        ] = (
-            prediction_df["actual_label"]
-            == prediction_df["predicted_label"]
+        prediction_df["correct"] = (
+            prediction_df["actual_label"] == prediction_df["predicted_label"]
         )
 
         prediction_path = os.path.join(
-            RESULT_DIR,
+            result_dir,
             f"{model_name}_validation_predictions.csv"
         )
+        prediction_df.to_csv(prediction_path, index=False)
+        print(f"\n✓ Validation predictions saved:\n  {prediction_path}")
 
-        prediction_df.to_csv(
-            prediction_path,
-            index=False
-        )
+        all_predictions.append(prediction_df)
 
-        print(
-            f"\n✓ Validation predictions saved:"
-        )
+    print_header("MODEL COMPARISON")
 
-        print(
-            f"  {prediction_path}"
-        )
-
-        all_predictions.append(
-            prediction_df
-        )
-
-    # ==================================================================
-    # MODEL COMPARISON
-    # ==================================================================
-
-    print_header(
-        "MODEL COMPARISON"
-    )
-
-    results_df = pd.DataFrame(
-        all_results
-    )
-
-    results_df = results_df.sort_values(
-        by="f1_score",
-        ascending=False
-    )
+    results_df = pd.DataFrame(all_results)
+    results_df = results_df.sort_values(by="f1_score", ascending=False)
 
     display_columns = [
         "model",
@@ -837,272 +431,73 @@ def main():
         "roc_auc"
     ]
 
-    print(
-        results_df[
-            display_columns
-        ].to_string(
-            index=False
-        )
-    )
+    print(results_df[display_columns].to_string(index=False))
 
-    comparison_path = os.path.join(
-        RESULT_DIR,
-        "validation_model_comparison.csv"
-    )
+    comparison_path = os.path.join(result_dir, "validation_model_comparison.csv")
+    results_df.to_csv(comparison_path, index=False)
+    print(f"\n✓ Comparison saved:\n  {comparison_path}")
 
-    results_df.to_csv(
-        comparison_path,
-        index=False
-    )
-
-    print(
-        f"\n✓ Comparison saved:"
-    )
-
-    print(
-        f"  {comparison_path}"
-    )
-
-    # ==================================================================
-    # SELECT BEST MODEL
-    # ==================================================================
-
-    print_header(
-        "BEST MODEL BASED ON VALIDATION"
-    )
+    print_header("BEST MODEL BASED ON VALIDATION")
 
     best_row = results_df.iloc[0]
-
     best_model_name = best_row["model"]
 
-    print(
-        f"Best model: {best_model_name}"
-    )
-
-    print(
-        f"Validation accuracy: "
-        f"{best_row['accuracy']:.4f}"
-    )
-
-    print(
-        f"Validation F1-score: "
-        f"{best_row['f1_score']:.4f}"
-    )
-
-    print(
-        f"Validation ROC-AUC: "
-        f"{best_row['roc_auc']:.4f}"
-    )
-
-    # ==================================================================
-    # SAVE BEST MODEL INFORMATION
-    # ==================================================================
+    print(f"Best model: {best_model_name}")
+    print(f"Validation accuracy: {best_row['accuracy']:.4f}")
+    print(f"Validation F1-score: {best_row['f1_score']:.4f}")
+    print(f"Validation ROC-AUC: {best_row['roc_auc']:.4f}")
 
     best_model_info = {
         "best_model": best_model_name,
         "selection_metric": "f1_score",
-        "validation_accuracy": float(
-            best_row["accuracy"]
-        ),
-        "validation_precision": float(
-            best_row["precision"]
-        ),
-        "validation_recall": float(
-            best_row["recall"]
-        ),
-        "validation_f1_score": float(
-            best_row["f1_score"]
-        ),
-        "validation_roc_auc": float(
-            best_row["roc_auc"]
-        ),
+        "validation_accuracy": float(best_row["accuracy"]),
+        "validation_precision": float(best_row["precision"]),
+        "validation_recall": float(best_row["recall"]),
+        "validation_f1_score": float(best_row["f1_score"]),
+        "validation_roc_auc": float(best_row["roc_auc"]),
         "training_samples": len(train),
         "validation_samples": len(validation),
         "test_samples": len(test),
         "feature_count": len(train_features),
-        "random_state": RANDOM_STATE,
+        "random_state": random_state,
         "test_used": False
     }
 
-    best_info_path = os.path.join(
-        RESULT_DIR,
-        "best_model_validation.json"
-    )
+    best_info_path = os.path.join(result_dir, "best_model_validation.json")
+    with open(best_info_path, "w", encoding="utf-8") as f:
+        json.dump(best_model_info, f, indent=4)
 
-    with open(
-        best_info_path,
-        "w",
-        encoding="utf-8"
-    ) as f:
+    print(f"\n✓ Best model information saved:\n  {best_info_path}")
 
-        json.dump(
-            best_model_info,
-            f,
-            indent=4
-        )
-
-    print(
-        f"\n✓ Best model information saved:"
-    )
-
-    print(
-        f"  {best_info_path}"
-    )
-
-    # ==================================================================
-    # SAVE TRAINING SUMMARY
-    # ==================================================================
-
-    summary_path = os.path.join(
-        RESULT_DIR,
-        "training_summary.txt"
-    )
-
-    with open(
-        summary_path,
-        "w",
-        encoding="utf-8"
-    ) as f:
-
-        f.write(
-            "DEEPFAKE DETECTION - "
-            "PILOT MODEL TRAINING\n"
-        )
-
-        f.write(
-            "=" * 60 + "\n\n"
-        )
-
-        f.write(
-            f"Training samples: {len(train)}\n"
-        )
-
-        f.write(
-            f"Validation samples: {len(validation)}\n"
-        )
-
-        f.write(
-            f"Test samples: {len(test)}\n"
-        )
-
-        f.write(
-            f"Selected features: "
-            f"{len(train_features)}\n\n"
-        )
-
-        f.write(
-            "Models trained:\n"
-        )
-
+    summary_path = os.path.join(result_dir, "training_summary.txt")
+    with open(summary_path, "w", encoding="utf-8") as f:
+        f.write("DEEPFAKE DETECTION - PILOT MODEL TRAINING\n")
+        f.write("=" * 60 + "\n\n")
+        f.write(f"Training samples: {len(train)}\n")
+        f.write(f"Validation samples: {len(validation)}\n")
+        f.write(f"Test samples: {len(test)}\n")
+        f.write(f"Selected features: {len(train_features)}\n\n")
+        f.write("Models trained:\n")
         for model_name in models:
-            f.write(
-                f"  - {model_name}\n"
-            )
-
-        f.write("\n")
-
-        f.write(
-            "Validation results:\n"
-        )
-
-        f.write(
-            results_df[
-                display_columns
-            ].to_string(
-                index=False
-            )
-        )
-
+            f.write(f"  - {model_name}\n")
+        f.write("\nValidation results:\n")
+        f.write(results_df[display_columns].to_string(index=False))
         f.write("\n\n")
+        f.write(f"Best model: {best_model_name}\n")
+        f.write("Selection metric: F1-score\n")
 
-        f.write(
-            f"Best model: "
-            f"{best_model_name}\n"
-        )
+    print(f"\n✓ Training summary saved:\n  {summary_path}")
 
-        f.write(
-            "Selection metric: F1-score\n"
-        )
+    print_header("MODEL TRAINING COMPLETED")
+    print(f"Training samples:       {len(train)}")
+    print(f"Validation samples:     {len(validation)}")
+    print(f"Test samples:           {len(test)} (NOT USED)")
+    print(f"Selected features:      {len(train_features)}")
+    print(f"\nBest validation model:  {best_model_name}")
+    print(f"\nModels saved to:\n{model_dir}")
+    print(f"\nResults saved to:\n{result_dir}")
+    print("\nNext stage:\nFinal model evaluation on the TEST set.")
 
-        f.write(
-            "\nIMPORTANT:\n"
-        )
-
-        f.write(
-            "The test set was NOT used for "
-            "model training or model selection.\n"
-        )
-
-    print(
-        f"\n✓ Training summary saved:"
-    )
-
-    print(
-        f"  {summary_path}"
-    )
-
-    # ==================================================================
-    # FINAL MESSAGE
-    # ==================================================================
-
-    print_header(
-        "MODEL TRAINING COMPLETED"
-    )
-
-    print(
-        f"Training samples:       {len(train)}"
-    )
-
-    print(
-        f"Validation samples:     {len(validation)}"
-    )
-
-    print(
-        f"Test samples:           {len(test)} "
-        "(NOT USED)"
-    )
-
-    print(
-        f"Selected features:      {len(train_features)}"
-    )
-
-    print()
-    print(
-        f"Best validation model:  "
-        f"{best_model_name}"
-    )
-
-    print()
-    print(
-        "Models saved to:"
-    )
-
-    print(
-        MODEL_DIR
-    )
-
-    print()
-    print(
-        "Results saved to:"
-    )
-
-    print(
-        RESULT_DIR
-    )
-
-    print()
-    print(
-        "Next stage:"
-    )
-
-    print(
-        "Final model evaluation on the TEST set."
-    )
-
-
-# ======================================================================
-# ENTRY POINT
-# ======================================================================
 
 if __name__ == "__main__":
     main()
