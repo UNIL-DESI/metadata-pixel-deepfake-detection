@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import os
+import sys
 import json
 import joblib
 import numpy as np
@@ -181,9 +182,9 @@ def main():
         config = yaml.safe_load(f)
 
     base_dir = config["dataset"]["base_dir"]
-    selected_dir = str(Path(base_dir) / "features" / "selected")
-    model_output_dir = str(Path(base_dir) / "models" / "pilot")
-    results_output_dir = str(Path(base_dir) / "results" / "pilot")
+    selected_dir = "features/selected"
+    model_output_dir = "models/pilot"
+    results_output_dir = "results/pilot"
 
     train_file = os.path.join(selected_dir, "train_selected_160.csv")
     validation_file = os.path.join(selected_dir, "validation_selected_160.csv")

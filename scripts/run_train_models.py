@@ -5,6 +5,7 @@ from pathlib import Path
 import os
 import json
 import joblib
+import sys
 import numpy as np
 import pandas as pd
 import yaml
@@ -296,10 +297,9 @@ def main():
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    base_dir = config["dataset"]["base_dir"]
-    selected_dir = str(Path(base_dir) / "features" / "selected")
-    model_dir = str(Path(base_dir) / "models" / "pilot")
-    result_dir = str(Path(base_dir) / "results" / "pilot")
+    selected_dir = "features/selected"
+    model_dir = "models/pilot"
+    result_dir = "results/pilot"
 
     train_file = os.path.join(selected_dir, "train_selected_160.csv")
     validation_file = os.path.join(selected_dir, "validation_selected_160.csv")

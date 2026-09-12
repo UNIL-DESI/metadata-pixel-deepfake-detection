@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import os
+import sys
 import warnings
 
 import numpy as np
@@ -579,9 +580,8 @@ def main():
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    base_dir = config["dataset"]["base_dir"]
-    input_path = str(Path(base_dir) / "features" / "aligned" / "aligned_all_features.csv")
-    output_dir = str(Path(base_dir) / "features" / "selected")
+    input_path = "features/aligned/aligned_all_features.csv"
+    output_dir = "features/selected"
 
     random_state = 42
     val_size = 0.15

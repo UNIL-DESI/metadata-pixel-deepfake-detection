@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import os
+import sys
 import pandas as pd
 import yaml
 
@@ -42,20 +43,16 @@ def main():
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    base_dir = config["dataset"]["base_dir"]
-
-    handcrafted_path = str(
-        Path(base_dir) / "features" / "handcrafted" / "handcrafted_video_features.csv"
-    )
+    handcrafted_path = "features/handcrafted/handcrafted_video_features.csv"
+    
     cnn_model = config["features"]["cnn_features"]["model"]
-    cnn_path = str(
-        Path(base_dir) / "features" / "CNNFeatures" / f"{cnn_model}_video_features.csv"
-    )
-    metadata_path = str(
-        Path(base_dir) / "features" / "metadata" / "metadata_preprocessed" / "metadata_feature_matrix.csv"
-    )
+    cnn_path = f"features/CNNFeatures/{cnn_model}_video_features.csv"
+    
+    metadata_path = "features/metadata/metadata_preprocessed/metadata_feature_matrix.csv"
+    
     inventory_path = config["catalog"]["file"]
-    output_dir = str(Path(base_dir) / "features" / "aligned")
+    
+    output_dir = "features/aligned"
 
     print("=" * 70)
     print("FEATURE ALIGNMENT")

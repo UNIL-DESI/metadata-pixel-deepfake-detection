@@ -3,7 +3,7 @@ project:
   mode: full
 
 dataset:
-  base_dir: "data"
+  base_dir: "data/raw/Hybrid_Deepfake_Dataset"
 
 catalog:
   file: "dataset_inventory.csv"
@@ -48,7 +48,7 @@ features:
 
   metadata:
     catalog: "dataset_inventory.csv"
-    output: "features/metadata/metadata_features.csv"
+    output: "features/metadata/raw_metadata_features.csv"
 
 preprocessing:
   resize_width: 224

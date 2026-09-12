@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import sys
+import json
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -422,6 +423,36 @@ def main():
     pd.crosstab(df["dataset"], df["label"]).to_csv(
         output_dir / "dataset_label_counts.csv"
     )
+
+    pd.crosstab(df["dataset"], df["label"]).to_csv(
+        output_dir / "dataset_label_counts.csv"
+    )
+
+    # ============================================================
+    # SAVE JSON REPORT FOR DVC
+    # ============================================================
+    # Ensure the parent 'reports' folder exists
+    json_report_path = Path("reports/metadata_analysis.json")
+    json_report_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Create a safe, JSON-serializable dictionary of key metrics
+    report_data = {
+        "total_videos": int(len(df)),
+        "label_distribution": {str(k): int(v) for k, v in df["label"].value_counts().items()},
+        "dataset_distribution": {str(k): int(v) for k, v in df["dataset"].value_counts().items()}
+    }
+    
+    # Save the file
+    with open(json_report_path, "w", encoding="utf-8") as f:
+        json.dump(report_data, f, indent=4)
+        
+    print(f"\nSaved DVC JSON report to: {json_report_path}")
+
+    # ===== This is your existing code below =====
+    print("\n" + "=" * 70)
+    print("ANALYSIS COMPLETE")
+    print("=" * 70)
+
 
     print("\n" + "=" * 70)
     print("ANALYSIS COMPLETE")

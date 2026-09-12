@@ -1,9 +1,9 @@
-from __thus__ import annotations
+from __future__ import annotations
 
 import argparse
 from pathlib import Path
 import os
-import json
+import sys
 import warnings
 import numpy as np
 import pandas as pd
@@ -411,8 +411,8 @@ def main():
         config = yaml.safe_load(f)
 
     base_dir = config["dataset"]["base_dir"]
-    input_file = str(Path(base_dir) / "features" / "aligned" / "aligned_all_features.csv")
-    output_dir = str(Path(base_dir) / "results" / "pilot" / "ablation")
+    input_file = "features/aligned/aligned_all_features.csv"
+    output_dir = "results/pilot/ablation"
 
     random_state = 42
     validation_size = 0.15

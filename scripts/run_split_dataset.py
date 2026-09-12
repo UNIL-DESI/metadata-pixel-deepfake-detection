@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 import os
+import sys
 import pandas as pd
 import yaml
 from sklearn.model_selection import train_test_split
@@ -27,9 +28,9 @@ def main():
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    base_dir = config["dataset"]["base_dir"]
+    
     inventory_path = config["catalog"]["file"]
-    output_dir = str(Path(base_dir) / "splits")
+    output_dir = "data/splits"
 
     random_state = 42
     val_size = 0.15

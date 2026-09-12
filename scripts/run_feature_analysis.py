@@ -201,9 +201,8 @@ def main():
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    base_dir = config["dataset"]["base_dir"]
-    input_dir = str(Path(base_dir) / "features" / "aligned")
-    output_dir = str(Path(base_dir) / "features" / "analysis")
+    input_dir = "features/aligned"
+    output_dir = "features/analysis"
 
     os.makedirs(output_dir, exist_ok=True)
 

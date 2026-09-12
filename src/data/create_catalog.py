@@ -9,9 +9,9 @@ import pandas as pd
 
 
 DEFAULT_FOLDERS: Dict[str, Tuple[str, str]] = {
-    "FaceForensics": ("RealVideos", "FakeVideos"),
-    "Celeb-DF": ("RealVideos", "FakeVideos"),
-    "DFDC_Selected": ("RealVideos", "FakeVideos"),
+    "FF++": ("Real", "Fake"),
+    "Celeb-DF": ("Real", "Fake"),
+    "DFDC": ("Real", "Fake"),
 }
 
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv")
@@ -43,8 +43,9 @@ def create_dataset_catalog(
                 print(f"[WARN] Folder not found: {folder_path}")
                 continue
 
-            for file_path in sorted(folder_path.iterdir()):
-                if file_path.is_file() and file_path.suffix.lower() in video_extensions:
+            valid_videos = [f for f in sorted(folder_path.iterdir()) if f.is_file() and f.suffix.lower() in video_extensions]
+
+            for file_path in valid_videos[:5]:
                     rows.append(
                         {
                             "filepath": str(file_path),
