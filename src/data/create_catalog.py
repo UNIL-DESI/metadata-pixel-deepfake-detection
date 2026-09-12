@@ -45,7 +45,7 @@ def create_dataset_catalog(
 
             valid_videos = [f for f in sorted(folder_path.iterdir()) if f.is_file() and f.suffix.lower() in video_extensions]
 
-            for file_path in valid_videos[:5]:
+            for file_path in valid_videos:
                     rows.append(
                         {
                             "filepath": str(file_path),
