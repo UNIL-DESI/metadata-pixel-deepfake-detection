@@ -6,9 +6,24 @@ authors = [
     { name = "Dinithi", email = "dinithiperera0904@gmail.com" }
 ]
 dependencies = [
-    # Dependencies are managed via Docker and requirements.txt
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "scikit-image",
+    "opencv-python<5.0",
+    "pillow",
+    "imageio",
+    "matplotlib",
+    "tqdm",
+    "pyyaml",
+    "requests",
+    "ipykernel",
+    "jupyterlab",
+    "dvc-gdrive",
+    "tensorflow",
+    "seaborn"
 ]
 
 [tool.cluster-ci]
-# Adding a section to explicitly acknowledge the cluster platform
 managed = true
