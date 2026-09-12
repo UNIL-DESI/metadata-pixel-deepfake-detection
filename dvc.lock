@@ -5,8 +5,8 @@ stages:
     outs:
     - path: .dvc-viewer/hashes
       hash: md5
-      md5: 8b348c003c26bcd2604184e672db220b.dir
-      size: 9843
+      md5: 695dbf643cc80353fde4949fda735b85.dir
+      size: 9553
       nfiles: 34
   prepare_dataset:
     cmd: curl -C - -L 
@@ -32,8 +32,8 @@ stages:
       size: 64
     - path: config/full.yaml
       hash: md5
-      md5: 1505f8a0b1686113b9b4c76fa2a46781
-      size: 1189
+      md5: d5c0bb23d7438b85d91905ac68cf6dba
+      size: 1134
     - path: scripts/run_create_catalog.py
       hash: md5
       md5: 0667726a27ed4d5fb770a0f0c4d79fbd
@@ -41,8 +41,8 @@ stages:
     outs:
     - path: dataset_inventory.csv
       hash: md5
-      md5: 333590c333001c466d151abbe4982f98
-      size: 2425
+      md5: b44b09e082a28b8168f43edb3116f825
+      size: 2394
   extract_frames:
     cmd: python scripts/run_extract_frames.py --config config/full.yaml
     deps:
@@ -52,12 +52,12 @@ stages:
       size: 64
     - path: config/full.yaml
       hash: md5
-      md5: 1505f8a0b1686113b9b4c76fa2a46781
-      size: 1189
+      md5: d5c0bb23d7438b85d91905ac68cf6dba
+      size: 1134
     - path: dataset_inventory.csv
       hash: md5
-      md5: 333590c333001c466d151abbe4982f98
-      size: 2425
+      md5: b44b09e082a28b8168f43edb3116f825
+      size: 2394
     - path: scripts/run_extract_frames.py
       hash: md5
       md5: 4cca7dda8375384a63247d8918f0d715
@@ -65,8 +65,8 @@ stages:
     outs:
     - path: data/ExtractedFrames/
       hash: md5
-      md5: df02f8ddae3060b9e213cf8d8b048bff.dir
-      size: 129018280
+      md5: 8fd1fe58df17cf2e02beb3ebd85004fc.dir
+      size: 129089552
       nfiles: 750
   extract_regions:
     cmd: python scripts/run_extract_multi_regions.py --config config/full.yaml
@@ -77,12 +77,12 @@ stages:
       size: 64
     - path: config/full.yaml
       hash: md5
-      md5: 1505f8a0b1686113b9b4c76fa2a46781
-      size: 1189
+      md5: d5c0bb23d7438b85d91905ac68cf6dba
+      size: 1134
     - path: data/ExtractedFrames/
       hash: md5
-      md5: df02f8ddae3060b9e213cf8d8b048bff.dir
-      size: 129018280
+      md5: 8fd1fe58df17cf2e02beb3ebd85004fc.dir
+      size: 129089552
       nfiles: 750
     - path: scripts/run_extract_multi_regions.py
       hash: md5
@@ -91,9 +91,9 @@ stages:
     outs:
     - path: data/MultiRegionFrames/
       hash: md5
-      md5: 863ddaacb205a04e1e31daccbe3d03dc.dir
-      size: 31694425
-      nfiles: 2111
+      md5: a2e61ab9b0597799cb98e26e24bcd24f.dir
+      size: 31605449
+      nfiles: 2107
   extract_handcrafted:
     cmd: python scripts/run_extract_handcrafted_features.py --config 
       config/full.yaml
@@ -203,12 +203,12 @@ stages:
       size: 64
     - path: config/full.yaml
       hash: md5
-      md5: 1505f8a0b1686113b9b4c76fa2a46781
-      size: 1189
+      md5: d5c0bb23d7438b85d91905ac68cf6dba
+      size: 1134
     - path: dataset_inventory.csv
       hash: md5
-      md5: 333590c333001c466d151abbe4982f98
-      size: 2425
+      md5: b44b09e082a28b8168f43edb3116f825
+      size: 2394
     - path: scripts/run_extract_metadata.py
       hash: md5
       md5: bc950554386c5a17bf0bb064a4e00c4d
@@ -216,8 +216,8 @@ stages:
     outs:
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 325134e8cbb2c645b0bd74ec3681be6a
-      size: 4070
+      md5: ac0776ea91dd54d3a8ba2870525f4f82
+      size: 3528
   analyze_metadata:
     cmd: python scripts/analyze_metadata.py --config config/full.yaml
     deps:
@@ -227,21 +227,21 @@ stages:
       size: 64
     - path: config/full.yaml
       hash: md5
-      md5: 1505f8a0b1686113b9b4c76fa2a46781
-      size: 1189
+      md5: d5c0bb23d7438b85d91905ac68cf6dba
+      size: 1134
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 325134e8cbb2c645b0bd74ec3681be6a
-      size: 4070
+      md5: ac0776ea91dd54d3a8ba2870525f4f82
+      size: 3528
     - path: scripts/analyze_metadata.py
       hash: md5
-      md5: 90013080d67f7a429eba3822612157f5
-      size: 14282
+      md5: ece89c5fcff40ba1b62ce62acc3147ab
+      size: 13820
     outs:
     - path: reports/metadata_analysis.json
       hash: md5
-      md5: 491087c51af0d52258a7413f662fe5a8
-      size: 211
+      md5: 85f24c22af9e957e3467121c15fa0d04
+      size: 200
   preprocess_metadata:
     cmd: python scripts/preprocess_metadata.py --config config/full.yaml
     deps:
@@ -251,21 +251,21 @@ stages:
       size: 64
     - path: config/full.yaml
       hash: md5
-      md5: 1505f8a0b1686113b9b4c76fa2a46781
-      size: 1189
+      md5: d5c0bb23d7438b85d91905ac68cf6dba
+      size: 1134
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 325134e8cbb2c645b0bd74ec3681be6a
-      size: 4070
+      md5: ac0776ea91dd54d3a8ba2870525f4f82
+      size: 3528
     - path: scripts/preprocess_metadata.py
       hash: md5
-      md5: 72d25aaaca943783957d8f4cd41c9cd0
-      size: 9311
+      md5: 729d4d32e54286d0cf8d8bde73605403
+      size: 8913
     outs:
     - path: features/metadata/metadata_preprocessed
       hash: md5
-      md5: 5f00a1ef806c55be69ba61113cc4237d.dir
-      size: 6025
+      md5: bf7ba0e8297e9712c7b99c914a938c40.dir
+      size: 2256
       nfiles: 3
   align_features:
     cmd: python scripts/run_align_features.py --config config/full.yaml

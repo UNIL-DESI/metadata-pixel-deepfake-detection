@@ -22,7 +22,9 @@ dependencies = [
     "jupyterlab",
     "dvc-gdrive",
     "tensorflow",
-    "seaborn"
+    "seaborn",
+    "cryptography>=41.0.0",
+    "pyopenssl>=23.2.0",
 ]
 
 [tool.cluster-ci]
