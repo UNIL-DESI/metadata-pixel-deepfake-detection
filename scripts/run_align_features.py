@@ -105,7 +105,7 @@ def main():
     # Add .copy() here too
     cnn = cnn.copy()
     cnn["media_id"] = (
-        cnn["video_id"].astype(str).str.strip()
+        cnn["video_id"].astype(str).str.strip().str.zfill(3)
     )
 
     if "media_id" not in metadata.columns:
