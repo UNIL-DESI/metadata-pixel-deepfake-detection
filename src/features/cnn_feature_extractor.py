@@ -1,204 +1,110 @@
+from __future__ import annotations
+
+import argparse
 from pathlib import Path
+import sys
+import yaml
 
-import cv2
-import numpy as np
-import pandas as pd
-from tqdm import tqdm
-
-from tensorflow.keras.applications.mobilenet_v2 import (
-    preprocess_input as mobilenet_preprocess
+sys.path.append(
+    str(
+        Path(__file__)
+        .resolve()
+        .parents[1]
+        / "src"
+    )
 )
 
-from tensorflow.keras.applications.efficientnet import (
-    preprocess_input as efficientnet_preprocess
-)
+from features.cnn_models import get_cnn_model
+from features.cnn_feature_extractor import extract_features
 
 
-def load_image(image_path, size=224):
-    """
-    Load and preprocess a single image.
-    """
+def collect_images(folder):
+    extensions = [
+        "*.jpg",
+        "*.jpeg",
+        "*.png"
+    ]
 
-    image = cv2.imread(str(image_path))
+    images = []
 
-    if image is None:
-        return None
+    for ext in extensions:
+        images.extend(
+            Path(folder).rglob(ext)
+        )
 
-    image = cv2.cvtColor(
-        image,
-        cv2.COLOR_BGR2RGB
+    return sorted(images)
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Extract CNN features from images")
+    parser.add_argument(
+        "--config",
+        default="config/pilot.yaml",
+        help="Path to YAML configuration file"
+    )
+    args = parser.parse_args()
+
+    with open(args.config, "r") as f:
+        config = yaml.safe_load(f)
+
+    cnn_config = config["features"]["cnn_features"]
+
+    model_name = cnn_config["model"]
+
+    print(
+        f"Loading {model_name}"
     )
 
-    image = cv2.resize(
-        image,
-        (size, size)
+    model = get_cnn_model(
+        model_name
     )
 
-    return image
+    input_dir = Path(
+        cnn_config["input_dir"]
+    )
+
+    output_dir = Path(
+        cnn_config["output_dir"]
+    )
+
+    output_dir.mkdir(
+        parents=True,
+        exist_ok=True
+    )
+
+    images = collect_images(
+        input_dir
+    )
+
+    print(
+        f"Images found: {len(images)}"
+    )
+
+    frame_features = extract_features(
+        model=model,
+        image_paths=images,
+        model_name=model_name,
+        image_size=cnn_config["input_size"]
+    )
+
+    frame_csv = (
+        output_dir /
+        f"{model_name}_frame_features.csv"
+    )
+
+    frame_features.to_csv(
+        frame_csv,
+        index=False
+    )
+
+    print(
+        f"\nFrame-level CNN features saved to:\n{frame_csv}"
+    )
+
+    print(
+        "CNN feature extraction completed."
+    )
 
 
-def extract_metadata(image_path):
-    """
-    Extract metadata from image path.
-
-    Expected folder structure:
-
-    MultiRegionFrames/
-        real/
-            video_id/
-                full/
-                    frame_000.jpg
-
-    """
-
-    parts = image_path.parts
-
-    label = ""
-    video_id = ""
-    region = ""
-    frame = image_path.name
-
-    for i, part in enumerate(parts):
-
-        part_lower = part.lower()
-
-        if part_lower in ["real", "fake"]:
-
-            label = part_lower
-
-            if i + 1 < len(parts):
-                video_id = parts[i + 1]
-
-            if i + 2 < len(parts):
-                region = parts[i + 2]
-
-            break
-
-    return label, video_id, region, frame
-
-
-def extract_features(
-        model,
-        image_paths,
-        model_name,
-        image_size=224,
-        batch_size=16
-):
-    """
-    Extract CNN features and return
-    a frame-level DataFrame.
-    """
-
-    if model_name.lower() == "mobilenetv2":
-
-        preprocess = mobilenet_preprocess
-
-    elif model_name.lower() == "efficientnetb0":
-
-        preprocess = efficientnet_preprocess
-
-    else:
-
-        raise ValueError(
-            "Unknown preprocessing method."
-        )
-
-    batch_images = []
-    batch_metadata = []
-
-    rows = []
-
-    for img_path in tqdm(
-            image_paths,
-            desc="Extracting CNN Features"
-    ):
-
-        image = load_image(
-            img_path,
-            image_size
-        )
-
-        if image is None:
-
-            print(
-                f"Skipping unreadable image: {img_path}"
-            )
-
-            continue
-
-        batch_images.append(image)
-
-        batch_metadata.append(
-            extract_metadata(img_path)
-        )
-
-        if len(batch_images) == batch_size:
-
-            batch_array = preprocess(
-                np.array(batch_images)
-            )
-
-            batch_features = model.predict(
-                batch_array,
-                verbose=0
-            )
-
-            for meta, feature in zip(
-                    batch_metadata,
-                    batch_features
-            ):
-
-                label, video_id, region, frame = meta
-
-                row = {
-                    "label": label,
-                    "video_id": video_id,
-                    "region": region,
-                    "frame": frame
-                }
-
-                for i, value in enumerate(feature):
-
-                    row[f"cnn_{i+1}"] = float(value)
-
-                rows.append(row)
-
-            batch_images = []
-            batch_metadata = []
-
-    # Process remaining images
-
-    if batch_images:
-
-        batch_array = preprocess(
-            np.array(batch_images)
-        )
-
-        batch_features = model.predict(
-            batch_array,
-            verbose=0
-        )
-
-        for meta, feature in zip(
-                batch_metadata,
-                batch_features
-        ):
-
-            label, video_id, region, frame = meta
-
-            row = {
-                "label": label,
-                "video_id": video_id,
-                "region": region,
-                "frame": frame
-            }
-
-            for i, value in enumerate(feature):
-
-                row[f"cnn_{i+1}"] = float(value)
-
-            rows.append(row)
-
-    frame_df = pd.DataFrame(rows)
-
-    return frame_df
+if __name__ == "__main__":
+    main()
