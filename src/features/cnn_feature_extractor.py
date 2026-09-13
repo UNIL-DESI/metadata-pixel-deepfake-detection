@@ -82,7 +82,7 @@ def extract_features(
         image_paths,
         model_name,
         image_size=224,
-        batch_size=32
+        batch_size=16
 ):
     """
     Extract CNN features and return

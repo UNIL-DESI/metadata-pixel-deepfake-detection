@@ -11,8 +11,8 @@
 # Laisse vide après les variables pour tout exécuter (dvc repro).
 # =========================================================================================
 # ── Resource Requirements ──
-REQUIRED_RAM=16GB
-REQUIRED_VRAM=12GB
+REQUIRED_RAM=32GB
+REQUIRED_VRAM=24GB
 MAX_RUNTIME_HOURS=24
 
 # ── Execution Control ──
