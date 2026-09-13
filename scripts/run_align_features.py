@@ -94,21 +94,18 @@ def main():
             "Handcrafted file does not contain 'video_name'."
         )
 
+    handcrafted = handcrafted.copy()
     handcrafted["media_id"] = (
-        handcrafted["video_name"]
-        .astype(str)
-        .str.strip()
+        handcrafted["video_name"].astype(str).str.strip()
     )
 
     if "video_id" not in cnn.columns:
-        raise ValueError(
-            "CNN file does not contain 'video_id'."
-        )
+        raise ValueError("CNN file does not contain 'video_id'.")
 
+    # Add .copy() here too
+    cnn = cnn.copy()
     cnn["media_id"] = (
-        cnn["video_id"]
-        .astype(str)
-        .str.strip()
+        cnn["video_id"].astype(str).str.strip()
     )
 
     if "media_id" not in metadata.columns:
@@ -161,6 +158,11 @@ def main():
     print("Handcrafted/CNN same:", hc_ids == cnn_ids)
     print("Handcrafted/Metadata same:", hc_ids == meta_ids)
     print("Handcrafted/Inventory same:", hc_ids == inventory_ids)
+
+    print("\n================ DEBUGGING IDs ================")
+    print(f"Sample IDs in Handcrafted but NOT in CNN: {list(hc_ids - cnn_ids)[:5]}")
+    print(f"Sample IDs in CNN but NOT in Handcrafted: {list(cnn_ids - hc_ids)[:5]}")
+    print("===============================================\n")
 
     if not (
         hc_ids == cnn_ids
