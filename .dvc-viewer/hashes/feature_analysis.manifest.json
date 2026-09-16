@@ -4,6 +4,6 @@
     "scripts/run_feature_analysis.py": "16590f33b8632fefdfbd984006e4efa9aaaef52483e306008fa8836781126cd3"
   },
   "import_graph": {
-    "scripts\\run_feature_analysis.py": []
+    "scripts/run_feature_analysis.py": []
   }
 }

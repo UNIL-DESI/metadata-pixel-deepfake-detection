@@ -8,12 +8,12 @@ stages:
   prepare_dataset:
     cmd: >-
       curl -C - -L "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/Deepfakes.zip" -o Deepfakes.zip &&
-      python -c "import zipfile, os; os.makedirs('data/raw/Hybrid_Deepfake_Dataset', exist_ok=True); print('Extracting (this may take a few minutes)...'); zipfile.ZipFile('Deepfakes.zip', 'r').extractall('data/raw/Hybrid_Deepfake_Dataset'); os.remove('Deepfakes.zip')"
+      python -c "import zipfile, os; os.makedirs('data/raw/Hybrid_Deepfake_Dataset', exist_ok=True); print('Extracting dataset (forced)...'); zipfile.ZipFile('Deepfakes.zip', 'r').extractall('data/raw/Hybrid_Deepfake_Dataset'); os.remove('Deepfakes.zip')"
     outs:
       - data/raw/Hybrid_Deepfake_Dataset
       
   catalog:
-    cmd: python scripts/run_create_catalog.py --config config/full.yaml
+    cmd: python scripts/run_create_catalog.py --config config/full.yaml  # forced inventory check
     deps: [scripts/run_create_catalog.py, config/full.yaml, .dvc-viewer/hashes/catalog.hash]
     outs: [dataset_inventory.csv]
     

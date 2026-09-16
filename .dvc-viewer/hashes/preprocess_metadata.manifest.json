@@ -4,6 +4,6 @@
     "scripts/preprocess_metadata.py": "e8b9ba98585b1721f3a5b03ed6d8e79da3152dab6b42e3aed010982de1faf68e"
   },
   "import_graph": {
-    "scripts\\preprocess_metadata.py": []
+    "scripts/preprocess_metadata.py": []
   }
 }

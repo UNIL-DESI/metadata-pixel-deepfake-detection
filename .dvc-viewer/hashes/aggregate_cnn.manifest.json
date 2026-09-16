@@ -5,9 +5,9 @@
     "src/features/aggregate_cnn_features.py": "4f32430c65ba92a302ee3b79c6b926e69abaeaf1f4b2d96bbab24b9b8160c1ac"
   },
   "import_graph": {
-    "scripts\\run_aggregate_cnn_features.py": [
-      "src\\features\\aggregate_cnn_features.py"
+    "scripts/run_aggregate_cnn_features.py": [
+      "src/features/aggregate_cnn_features.py"
     ],
-    "src\\features\\aggregate_cnn_features.py": []
+    "src/features/aggregate_cnn_features.py": []
   }
 }

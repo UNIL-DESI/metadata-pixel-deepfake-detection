@@ -5,9 +5,9 @@
     "src/preprocessing/extract_frames.py": "0978172b0805d1c558f239cf4ab12fbdd15f3a080545abcaf40c1e312c58b6ac"
   },
   "import_graph": {
-    "scripts\\run_extract_frames.py": [
-      "src\\preprocessing\\extract_frames.py"
+    "scripts/run_extract_frames.py": [
+      "src/preprocessing/extract_frames.py"
     ],
-    "src\\preprocessing\\extract_frames.py": []
+    "src/preprocessing/extract_frames.py": []
   }
 }

@@ -11,22 +11,22 @@
     "src/features/extract_lbp.py": "ff4e6d128844289585649456ac954cd632b558f435073ddd9dc57fb9baeb705c"
   },
   "import_graph": {
-    "scripts\\run_extract_handcrafted_features.py": [
-      "src\\features\\extract_handcrafted.py"
+    "scripts/run_extract_handcrafted_features.py": [
+      "src/features/extract_handcrafted.py"
     ],
-    "src\\features\\common.py": [],
-    "src\\features\\extract_color.py": [],
-    "src\\features\\extract_dct.py": [],
-    "src\\features\\extract_edge.py": [],
-    "src\\features\\extract_glcm.py": [],
-    "src\\features\\extract_handcrafted.py": [
-      "src\\features\\common.py",
-      "src\\features\\extract_color.py",
-      "src\\features\\extract_dct.py",
-      "src\\features\\extract_edge.py",
-      "src\\features\\extract_glcm.py",
-      "src\\features\\extract_lbp.py"
+    "src/features/common.py": [],
+    "src/features/extract_color.py": [],
+    "src/features/extract_dct.py": [],
+    "src/features/extract_edge.py": [],
+    "src/features/extract_glcm.py": [],
+    "src/features/extract_handcrafted.py": [
+      "src/features/common.py",
+      "src/features/extract_color.py",
+      "src/features/extract_dct.py",
+      "src/features/extract_edge.py",
+      "src/features/extract_glcm.py",
+      "src/features/extract_lbp.py"
     ],
-    "src\\features\\extract_lbp.py": []
+    "src/features/extract_lbp.py": []
   }
 }

@@ -6,12 +6,12 @@
     "src/features/metadata_utils.py": "003166da46a1eb335374289ce59adda37c176b9e20f75f51bc078ca7bfc6d1bd"
   },
   "import_graph": {
-    "scripts\\run_extract_metadata.py": [
-      "src\\features\\metadata_extractor.py"
+    "scripts/run_extract_metadata.py": [
+      "src/features/metadata_extractor.py"
     ],
-    "src\\features\\metadata_extractor.py": [
-      "src\\features\\metadata_utils.py"
+    "src/features/metadata_extractor.py": [
+      "src/features/metadata_utils.py"
     ],
-    "src\\features\\metadata_utils.py": []
+    "src/features/metadata_utils.py": []
   }
 }

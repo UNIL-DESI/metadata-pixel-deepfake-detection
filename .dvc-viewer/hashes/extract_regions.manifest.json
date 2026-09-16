@@ -7,14 +7,14 @@
     "src/preprocessing/resize_faces.py": "1f82d2db4802f7f693336421cc6c62f32fd9270a53e1c6967a9baca2de950c25"
   },
   "import_graph": {
-    "scripts\\run_extract_multi_regions.py": [
-      "src\\preprocessing\\multi_region_extraction.py"
+    "scripts/run_extract_multi_regions.py": [
+      "src/preprocessing/multi_region_extraction.py"
     ],
-    "src\\preprocessing\\detect_faces.py": [],
-    "src\\preprocessing\\multi_region_extraction.py": [
-      "src\\preprocessing\\detect_faces.py",
-      "src\\preprocessing\\resize_faces.py"
+    "src/preprocessing/detect_faces.py": [],
+    "src/preprocessing/multi_region_extraction.py": [
+      "src/preprocessing/detect_faces.py",
+      "src/preprocessing/resize_faces.py"
     ],
-    "src\\preprocessing\\resize_faces.py": []
+    "src/preprocessing/resize_faces.py": []
   }
 }

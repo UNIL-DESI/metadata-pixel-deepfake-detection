@@ -5,9 +5,9 @@
     "src/features/aggregate_handcrafted_features.py": "6b610a703694e44b655832faacbac57801136598be0f00a8936773a802033357"
   },
   "import_graph": {
-    "scripts\\run_aggregate_handcrafted_features.py": [
-      "src\\features\\aggregate_handcrafted_features.py"
+    "scripts/run_aggregate_handcrafted_features.py": [
+      "src/features/aggregate_handcrafted_features.py"
     ],
-    "src\\features\\aggregate_handcrafted_features.py": []
+    "src/features/aggregate_handcrafted_features.py": []
   }
 }

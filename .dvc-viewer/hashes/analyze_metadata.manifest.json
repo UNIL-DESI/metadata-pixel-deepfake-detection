@@ -4,6 +4,6 @@
     "scripts/analyze_metadata.py": "ae14bd6a2ae1109ab8645bd8c26f86063480cd08371f6ece169cb0f6c70c5bd8"
   },
   "import_graph": {
-    "scripts\\analyze_metadata.py": []
+    "scripts/analyze_metadata.py": []
   }
 }
