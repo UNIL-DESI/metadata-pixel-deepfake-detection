@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import static_ffmpeg
+static_ffmpeg.add_paths()  # This magically makes "ffprobe" available to the system
+
+import subprocess
 import argparse
 import sys
 from pathlib import Path

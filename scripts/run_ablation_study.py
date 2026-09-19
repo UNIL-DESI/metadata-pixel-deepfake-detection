@@ -398,7 +398,7 @@ def main():
     parser = argparse.ArgumentParser(description="Leakage-safe ablation study")
     parser.add_argument(
         "--config",
-        default="pilot.yaml",
+        default="full.yaml",
         help="Path to YAML configuration file",
     )
     args = parser.parse_args()
@@ -412,7 +412,7 @@ def main():
 
     base_dir = config["dataset"]["base_dir"]
     input_file = "features/aligned/aligned_all_features.csv"
-    output_dir = "results/pilot/ablation"
+    output_dir = "results/full/ablation"
 
     random_state = 42
     validation_size = 0.15
@@ -598,3 +598,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #

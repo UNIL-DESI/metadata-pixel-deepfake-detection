@@ -5,9 +5,9 @@ stages:
     outs:
     - path: .dvc-viewer/hashes
       hash: md5
-      md5: 2ec849ab929da0a9b9a0cf7679f66c57.dir
-      size: 9553
-      nfiles: 34
+      md5: eac34c0b5ed8463ea2353d51f085df2f.dir
+      size: 9904
+      nfiles: 36
   prepare_dataset:
     cmd: curl -C - -L 
       "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/Deepfakes.zip"
@@ -23,7 +23,8 @@ stages:
       size: 8245516224
       nfiles: 2009
   catalog:
-    cmd: python scripts/run_create_catalog.py --config config/full.yaml
+    cmd: echo "force-fix" && python scripts/run_create_catalog.py --config 
+      config/full.yaml
     deps:
     - path: .dvc-viewer/hashes/catalog.hash
       hash: md5
@@ -40,8 +41,8 @@ stages:
     outs:
     - path: dataset_inventory.csv
       hash: md5
-      md5: 68b329da9893e34099c7d8ad5cb9c940
-      size: 1
+      md5: 5f63242b3a462725086836d9c494a188
+      size: 158136
   extract_frames:
     cmd: python scripts/run_extract_frames.py --config config/full.yaml
     deps:
@@ -198,7 +199,7 @@ stages:
     deps:
     - path: .dvc-viewer/hashes/extract_metadata.hash
       hash: md5
-      md5: 5bb0fcc502e87fbe630111a4445c897c
+      md5: 583eae3eedb9d6a5ef12699ff9ee2eea
       size: 64
     - path: config/full.yaml
       hash: md5
@@ -210,13 +211,13 @@ stages:
       size: 158136
     - path: scripts/run_extract_metadata.py
       hash: md5
-      md5: bc950554386c5a17bf0bb064a4e00c4d
-      size: 1271
+      md5: 9c474d2e9ee66d64d3f3b2ebe4a961e5
+      size: 1395
     outs:
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 8e92ec5e2deb0e305e642c606699e2f3
-      size: 222150
+      md5: 807274925b0c02fa20f41f23b3f3ff2f
+      size: 257112
   analyze_metadata:
     cmd: python scripts/analyze_metadata.py --config config/full.yaml
     deps:
@@ -230,12 +231,12 @@ stages:
       size: 1134
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 8e92ec5e2deb0e305e642c606699e2f3
-      size: 222150
+      md5: 807274925b0c02fa20f41f23b3f3ff2f
+      size: 257112
     - path: scripts/analyze_metadata.py
       hash: md5
-      md5: ece89c5fcff40ba1b62ce62acc3147ab
-      size: 13820
+      md5: 1acc324fd340bdd21c2ba0a4fe5ff3be
+      size: 13827
     outs:
     - path: reports/metadata_analysis.json
       hash: md5
@@ -254,8 +255,8 @@ stages:
       size: 1134
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 8e92ec5e2deb0e305e642c606699e2f3
-      size: 222150
+      md5: 807274925b0c02fa20f41f23b3f3ff2f
+      size: 257112
     - path: scripts/preprocess_metadata.py
       hash: md5
       md5: 729d4d32e54286d0cf8d8bde73605403
@@ -263,8 +264,8 @@ stages:
     outs:
     - path: features/metadata/metadata_preprocessed
       hash: md5
-      md5: 7787104f155575a782c641e05f4ac31d.dir
-      size: 107660
+      md5: 3c664b8bb4b7b9ca48a14fac20c2f2bb.dir
+      size: 358476
       nfiles: 3
   align_features:
     cmd: python scripts/run_align_features.py --config config/full.yaml
@@ -287,8 +288,8 @@ stages:
       size: 12592197
     - path: features/metadata/metadata_preprocessed
       hash: md5
-      md5: 7787104f155575a782c641e05f4ac31d.dir
-      size: 107660
+      md5: 3c664b8bb4b7b9ca48a14fac20c2f2bb.dir
+      size: 358476
       nfiles: 3
     - path: scripts/run_align_features.py
       hash: md5
@@ -297,8 +298,8 @@ stages:
     outs:
     - path: features/aligned
       hash: md5
-      md5: 32ba4c172ff9ba65671f87e7c10683ea.dir
-      size: 586645235
+      md5: 44d8f5cce3882f20548102cf94720184.dir
+      size: 587143111
       nfiles: 5
   feature_analysis:
     cmd: python scripts/run_feature_analysis.py --config config/full.yaml
@@ -313,8 +314,8 @@ stages:
       size: 1134
     - path: features/aligned/aligned_all_features.csv
       hash: md5
-      md5: 182485b356ccb15ab5f725d9b802c74e
-      size: 293289044
+      md5: 90a29cecfed1e23db00ad7e531515deb
+      size: 293538012
     - path: scripts/run_feature_analysis.py
       hash: md5
       md5: 8552642905da6b86a32e72bab24b924d
@@ -322,8 +323,8 @@ stages:
     outs:
     - path: features/analysis
       hash: md5
-      md5: 6a2a596d2c7dde8d1bd49fe903e00493.dir
-      size: 3346900
+      md5: 25b88da0654731cd61466b6372e0f370.dir
+      size: 3350868
       nfiles: 32
   split_dataset:
     cmd: python scripts/run_split_dataset.py --config config/full.yaml
@@ -338,8 +339,8 @@ stages:
       size: 1134
     - path: features/aligned/aligned_all_features.csv
       hash: md5
-      md5: 182485b356ccb15ab5f725d9b802c74e
-      size: 293289044
+      md5: 90a29cecfed1e23db00ad7e531515deb
+      size: 293538012
     - path: scripts/run_split_dataset.py
       hash: md5
       md5: c204016d36f72380fb4a846fa55f25be
@@ -373,8 +374,8 @@ stages:
     outs:
     - path: features/selected
       hash: md5
-      md5: 70555e80dd2436f942bceb366bf6f6f2.dir
-      size: 7036402
+      md5: cd92490d6c39a3333bb4f9bace96d715.dir
+      size: 7029087
       nfiles: 7
   train_models:
     cmd: python scripts/run_train_models.py --config config/full.yaml
@@ -394,8 +395,8 @@ stages:
       nfiles: 7
     - path: features/selected
       hash: md5
-      md5: 70555e80dd2436f942bceb366bf6f6f2.dir
-      size: 7036402
+      md5: cd92490d6c39a3333bb4f9bace96d715.dir
+      size: 7029087
       nfiles: 7
     - path: scripts/run_train_models.py
       hash: md5
@@ -404,13 +405,13 @@ stages:
     outs:
     - path: models/
       hash: md5
-      md5: ad6b9f7fba3fcb43e30776f08cf7451d.dir
-      size: 13228224
+      md5: 489e634e94a4c89784b4bf01394f25ef.dir
+      size: 12664256
       nfiles: 3
     - path: results/pilot/best_model_validation.json
       hash: md5
-      md5: 675d808087511b6fe7478dd64640b190
-      size: 445
+      md5: 2cb3e2ab4da1ff56c952926855503bbb
+      size: 430
   final_evaluation:
     cmd: python scripts/run_final_evaluation.py --config config/full.yaml
     deps:
@@ -429,8 +430,8 @@ stages:
       nfiles: 7
     - path: models/
       hash: md5
-      md5: 72dc8d1cd1e47c33c59ffb6c6c522bc9.dir
-      size: 13239158
+      md5: 1f0e96eb2a2f59ea1ab62b94f4e492d6.dir
+      size: 12675126
       nfiles: 5
     - path: scripts/run_final_evaluation.py
       hash: md5
@@ -439,8 +440,8 @@ stages:
     outs:
     - path: results/pilot/final_test_metrics.json
       hash: md5
-      md5: b67f544db92e28bea8523322d32714a5
-      size: 524
+      md5: 5797d39925c0ba28b3169830af6115fd
+      size: 525
   ablation_study:
     cmd: python scripts/run_ablation_study.py --config config/full.yaml
     deps:
@@ -459,15 +460,22 @@ stages:
       nfiles: 7
     - path: features/aligned/aligned_all_features.csv
       hash: md5
-      md5: 182485b356ccb15ab5f725d9b802c74e
-      size: 293289044
+      md5: 90a29cecfed1e23db00ad7e531515deb
+      size: 293538012
     - path: scripts/run_ablation_study.py
       hash: md5
-      md5: 6c73e73c2ff3049585a1f5e7cc2a8f1f
-      size: 14665
+      md5: 2e1c1eeeaffb213e78b76ef7ce61dc3c
+      size: 14671
     outs:
     - path: results/pilot/ablation
       hash: md5
-      md5: 00a2627d859216b58b222dfcd0693521.dir
-      size: 343179
+      md5: 350bd072d59c0113fd18d2ee003a7f18.dir
+      size: 343213
       nfiles: 42
+  debug_script:
+    cmd: python scripts/debug_metadata_probe.py
+    deps:
+    - path: .dvc-viewer/hashes/debug_script.hash
+      hash: md5
+      md5: e0129c0cbdf0e60b12e5cacb04385542
+      size: 64

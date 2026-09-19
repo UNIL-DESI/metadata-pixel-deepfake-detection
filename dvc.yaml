@@ -3,123 +3,125 @@ stages:
     cmd: bash .dvc-viewer/bootstrap.sh && dvc-viewer hash
     always_changed: true
     outs:
-    - .dvc-viewer/hashes: {cache: false}  
-      
+    - .dvc-viewer/hashes: {cache: false}
+
   prepare_dataset:
-    cmd: >-
-      curl -C - -L "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/Deepfakes.zip" -o Deepfakes.zip &&
-      python -c "import zipfile, os; os.makedirs('data/raw/Hybrid_Deepfake_Dataset', exist_ok=True); print('Extracting dataset (forced)...'); zipfile.ZipFile('Deepfakes.zip', 'r').extractall('data/raw/Hybrid_Deepfake_Dataset'); os.remove('Deepfakes.zip')"
-    outs:
-      - data/raw/Hybrid_Deepfake_Dataset
-      
+    cmd: curl -C - -L "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/Deepfakes.zip"
+      -o Deepfakes.zip && python -c "import zipfile, os; os.makedirs('data/raw/Hybrid_Deepfake_Dataset',
+      exist_ok=True); print('Extracting dataset (forced)...'); zipfile.ZipFile('Deepfakes.zip',
+      'r').extractall('data/raw/Hybrid_Deepfake_Dataset'); os.remove('Deepfakes.zip')"
+    outs: [data/raw/Hybrid_Deepfake_Dataset]
+
   catalog:
-    cmd: python scripts/run_create_catalog.py --config config/full.yaml  # forced inventory check
+    cmd: echo "force-fix" && python scripts/run_create_catalog.py --config config/full.yaml
     deps: [scripts/run_create_catalog.py, config/full.yaml, .dvc-viewer/hashes/catalog.hash]
-    outs: [dataset_inventory.csv]
-    
+    metrics:
+    - dataset_inventory.csv: {cache: false}
+
   extract_frames:
     cmd: python scripts/run_extract_frames.py --config config/full.yaml
-    deps: [scripts/run_extract_frames.py, config/full.yaml, dataset_inventory.csv, .dvc-viewer/hashes/extract_frames.hash]
+    deps: [scripts/run_extract_frames.py, config/full.yaml, dataset_inventory.csv,
+      .dvc-viewer/hashes/extract_frames.hash]
     outs: [data/ExtractedFrames/]
-    
+
   extract_regions:
     cmd: python scripts/run_extract_multi_regions.py --config config/full.yaml
-    deps: [scripts/run_extract_multi_regions.py, config/full.yaml, data/ExtractedFrames/, .dvc-viewer/hashes/extract_regions.hash]
+    deps: [scripts/run_extract_multi_regions.py, config/full.yaml, data/ExtractedFrames/,
+      .dvc-viewer/hashes/extract_regions.hash]
+
     outs: [data/MultiRegionFrames/]
-    
   extract_handcrafted:
     cmd: python scripts/run_extract_handcrafted_features.py --config config/full.yaml
-    deps: [scripts/run_extract_handcrafted_features.py, config/full.yaml, data/MultiRegionFrames/, .dvc-viewer/hashes/extract_handcrafted.hash]
+    deps: [scripts/run_extract_handcrafted_features.py, config/full.yaml, data/MultiRegionFrames/,
+      .dvc-viewer/hashes/extract_handcrafted.hash]
     outs: [features/handcrafted/handcrafted_frame_features.csv]
-    
+
   aggregate_handcrafted:
     cmd: python scripts/run_aggregate_handcrafted_features.py --config config/full.yaml
-    deps: [scripts/run_aggregate_handcrafted_features.py, config/full.yaml, features/handcrafted/handcrafted_frame_features.csv, .dvc-viewer/hashes/aggregate_handcrafted.hash]
+    deps: [scripts/run_aggregate_handcrafted_features.py, config/full.yaml, features/handcrafted/handcrafted_frame_features.csv,
+      .dvc-viewer/hashes/aggregate_handcrafted.hash]
     outs: [features/handcrafted/handcrafted_video_features.csv]
     
   extract_cnn:
     cmd: python scripts/run_extract_cnn_features.py --config config/full.yaml
-    deps: [scripts/run_extract_cnn_features.py, config/full.yaml, data/MultiRegionFrames/, .dvc-viewer/hashes/extract_cnn.hash]
+    deps: [scripts/run_extract_cnn_features.py, config/full.yaml, data/MultiRegionFrames/,
+      .dvc-viewer/hashes/extract_cnn.hash]
     outs: [features/CNNFeatures/mobilenetv2_frame_features.csv]
-    
+
   aggregate_cnn:
     cmd: python scripts/run_aggregate_cnn_features.py --config config/full.yaml
-    deps: [scripts/run_aggregate_cnn_features.py, config/full.yaml, features/CNNFeatures/mobilenetv2_frame_features.csv, .dvc-viewer/hashes/aggregate_cnn.hash]
+    deps: [scripts/run_aggregate_cnn_features.py, config/full.yaml, features/CNNFeatures/mobilenetv2_frame_features.csv,
+      .dvc-viewer/hashes/aggregate_cnn.hash]
     outs: [features/CNNFeatures/mobilenetv2_video_features.csv]
-    
+
   extract_metadata:
     cmd: python scripts/run_extract_metadata.py --config config/full.yaml
-    deps: [scripts/run_extract_metadata.py, config/full.yaml, dataset_inventory.csv, .dvc-viewer/hashes/extract_metadata.hash]
+    always_changed: true
+    deps: [scripts/run_extract_metadata.py, config/full.yaml, dataset_inventory.csv,
+      .dvc-viewer/hashes/extract_metadata.hash]
     outs: [features/metadata/raw_metadata_features.csv]
-    
+
   analyze_metadata:
     cmd: python scripts/analyze_metadata.py --config config/full.yaml
-    deps: [scripts/analyze_metadata.py, config/full.yaml, features/metadata/raw_metadata_features.csv, .dvc-viewer/hashes/analyze_metadata.hash]
+    always_changed: true
+    deps: [scripts/analyze_metadata.py, config/full.yaml, features/metadata/raw_metadata_features.csv,
+      .dvc-viewer/hashes/analyze_metadata.hash]
     metrics:
     - reports/metadata_analysis.json: {cache: false}
-    
+
   preprocess_metadata:
     cmd: python scripts/preprocess_metadata.py --config config/full.yaml
-    deps: [scripts/preprocess_metadata.py, config/full.yaml, features/metadata/raw_metadata_features.csv, .dvc-viewer/hashes/preprocess_metadata.hash]
+    always_changed: true
+    deps: [scripts/preprocess_metadata.py, config/full.yaml, features/metadata/raw_metadata_features.csv,
+      .dvc-viewer/hashes/preprocess_metadata.hash]
     outs: [features/metadata/metadata_preprocessed]
-    
+
   align_features:
     cmd: python scripts/run_align_features.py --config config/full.yaml
-    deps: 
-      - scripts/run_align_features.py
-      - config/full.yaml
-      - features/handcrafted/handcrafted_video_features.csv
-      - features/CNNFeatures/mobilenetv2_video_features.csv
-      - features/metadata/metadata_preprocessed
-      - .dvc-viewer/hashes/align_features.hash
+    always_changed: true
+    deps: [scripts/run_align_features.py, config/full.yaml, features/handcrafted/handcrafted_video_features.csv,
+      features/CNNFeatures/mobilenetv2_video_features.csv, features/metadata/metadata_preprocessed,
+      .dvc-viewer/hashes/align_features.hash]
     outs: [features/aligned]
-    
+
   feature_analysis:
     cmd: python scripts/run_feature_analysis.py --config config/full.yaml
-    deps: 
-      - scripts/run_feature_analysis.py
-      - config/full.yaml
-      - features/aligned/aligned_all_features.csv
-      - .dvc-viewer/hashes/feature_analysis.hash
-    outs:
-      - features/analysis
-    
+    always_changed: true
+    deps: [scripts/run_feature_analysis.py, config/full.yaml, features/aligned/aligned_all_features.csv,
+      .dvc-viewer/hashes/feature_analysis.hash]
+    outs: [features/analysis]
+
   split_dataset:
     cmd: python scripts/run_split_dataset.py --config config/full.yaml
-    deps: [scripts/run_split_dataset.py, config/full.yaml, features/aligned/aligned_all_features.csv, .dvc-viewer/hashes/split_dataset.hash]
+    deps: [scripts/run_split_dataset.py, config/full.yaml, features/aligned/aligned_all_features.csv,
+      .dvc-viewer/hashes/split_dataset.hash]
     outs: [data/splits/]
-    
+
   feature_selection:
     cmd: python scripts/run_feature_selection.py --config config/full.yaml
+    always_changed: true
     deps: [scripts/run_feature_selection.py, config/full.yaml, data/splits/, .dvc-viewer/hashes/feature_selection.hash]
     outs: [features/selected]
-    
+
   train_models:
     cmd: python scripts/run_train_models.py --config config/full.yaml
-    deps: 
-      - scripts/run_train_models.py
-      - config/full.yaml
-      - features/selected
-      - data/splits/
-      - .dvc-viewer/hashes/train_models.hash
-    outs: 
-      - models/
+    deps: [scripts/run_train_models.py, config/full.yaml, features/selected, data/splits/,
+      .dvc-viewer/hashes/train_models.hash]
+    outs: [models/]
     metrics:
-      - results/pilot/best_model_validation.json: {cache: false}
-    
+    - results/pilot/best_model_validation.json: {cache: false}
+
   final_evaluation:
     cmd: python scripts/run_final_evaluation.py --config config/full.yaml
-    deps: [scripts/run_final_evaluation.py, config/full.yaml, models/, data/splits/, .dvc-viewer/hashes/final_evaluation.hash]
+    deps: [scripts/run_final_evaluation.py, config/full.yaml, models/, data/splits/,
+      .dvc-viewer/hashes/final_evaluation.hash]
     metrics:
     - results/pilot/final_test_metrics.json: {cache: false}
-    
+
   ablation_study:
     cmd: python scripts/run_ablation_study.py --config config/full.yaml
-    deps: 
-      - scripts/run_ablation_study.py
-      - config/full.yaml
-      - features/aligned/aligned_all_features.csv
-      - data/splits/
-      - .dvc-viewer/hashes/ablation_study.hash
-    outs:
-      - results/pilot/ablation
+    always_changed: true
+    deps: [scripts/run_ablation_study.py, config/full.yaml, features/aligned/aligned_all_features.csv,
+      data/splits/, .dvc-viewer/hashes/ablation_study.hash]
+    outs: [results/pilot/ablation]
+
