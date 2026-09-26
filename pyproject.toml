@@ -24,7 +24,7 @@ dependencies = [
     "tensorflow",
     "seaborn",
     "static-ffmpeg>=3.0",
-    "cryptography >= 41.0.0",
+    "cryptography==41.0.7",
     "pyopenssl >= 23.2.0"
 ]
 
