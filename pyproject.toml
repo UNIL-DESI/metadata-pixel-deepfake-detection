@@ -26,6 +26,7 @@ dependencies = [
     "cryptography<39.0.0",
     "pyopenssl<23.0.0",
     "static-ffmpeg>=3.0",
+    "google-api-python-client"
 ]
 
 [tool.cluster-ci]
