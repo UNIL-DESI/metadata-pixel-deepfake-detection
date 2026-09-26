@@ -23,8 +23,8 @@ dependencies = [
     "dvc-gdrive",
     "tensorflow",
     "seaborn",
-    "cryptography>=41.0.0",
-    "pyopenssl>=23.2.0",
+    "cryptography<39.0.0",
+    "pyopenssl<23.0.0",
     "static-ffmpeg>=3.0",
 ]
 
