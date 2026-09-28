@@ -1,12 +1,12 @@
 {
-    "total_videos": 30,
+    "total_videos": 2000,
     "label_distribution": {
-        "real": 15,
-        "fake": 15
+        "real": 1000,
+        "fake": 1000
     },
     "dataset_distribution": {
-        "FF++": 10,
-        "Celeb-DF": 10,
-        "DFDC": 10
+        "DFDC": 800,
+        "Celeb-DF": 600,
+        "DeeperForensics": 600
     }
 }

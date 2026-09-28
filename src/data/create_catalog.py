@@ -8,10 +8,12 @@ from typing import Dict, Iterable, Tuple
 import pandas as pd
 
 
+# ---> ADD DEEPERFORENSICS HERE <---
 DEFAULT_FOLDERS: Dict[str, Tuple[str, str]] = {
     "FF++": ("Real", "Fake"),
     "Celeb-DF": ("Real", "Fake"),
     "DFDC": ("Real", "Fake"),
+    "DeeperForensics": ("Real", "Fake"),  
 }
 
 VIDEO_EXTENSIONS = (".mp4", ".avi", ".mov", ".mkv")
@@ -36,24 +38,30 @@ def create_dataset_catalog(
     rows = []
 
     for dataset, (real_folder, fake_folder) in folders.items():
+        # Iterate over Real and Fake subdirectories
         for folder_name, label in [(real_folder, "real"), (fake_folder, "fake")]:
             folder_path = base_dir / dataset / folder_name
 
+            # Fallback for lowercase folder names if "Real" or "Fake" isn't found
             if not folder_path.exists():
-                print(f"[WARN] Folder not found: {folder_path}")
-                continue
+                folder_path_lower = base_dir / dataset / folder_name.lower()
+                if folder_path_lower.exists():
+                    folder_path = folder_path_lower
+                else:
+                    print(f"[WARN] Folder not found: {folder_path}")
+                    continue
 
             valid_videos = [f for f in sorted(folder_path.iterdir()) if f.is_file() and f.suffix.lower() in video_extensions]
 
             for file_path in valid_videos:
-                    rows.append(
-                        {
-                            "filepath": str(file_path),
-                            "dataset": dataset,
-                            "label": label,
-                            "video_name": file_path.stem,
-                        }
-                    )
+                rows.append(
+                    {
+                        "filepath": str(file_path).replace("\\", "/"), # Ensure forward slashes
+                        "dataset": dataset,
+                        "label": label,
+                        "video_name": file_path.stem,
+                    }
+                )
 
     df = pd.DataFrame(rows)
 

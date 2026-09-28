@@ -1,0 +1,9 @@
+{
+  "aggregate_hash": "cf77b33c6bdd6d256711e39b8135dc10a20a6a55e005cf381254809782b8f5ec",
+  "file_hashes": {
+    "scripts/run_metadata_bias_screening.py": "0117e821c7d6a8378529e89e5cb47d6bf363939e833459b4f8ba10074ac85a83"
+  },
+  "import_graph": {
+    "scripts/run_metadata_bias_screening.py": []
+  }
+}
