@@ -442,6 +442,9 @@ def main():
     df = pd.read_csv(input_file)
     print(f"\nDataset shape: {df.shape}")
 
+    # ---> ADD THIS DEBUG LINE HERE:
+    print(f"\nDEBUG COLUMNS: {df.columns[:20].tolist()}")
+
     if "media_id" not in df.columns or "label" not in df.columns:
         raise ValueError("Required columns missing.")
 

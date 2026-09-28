@@ -16,7 +16,8 @@ REQUIRED_VRAM=24GB
 MAX_RUNTIME_HOURS=24
 
 # ── Execution Control ──
-STAGES=catalog
+STAGES=prepare_dataset,catalog,extract_metadata,preprocess_metadata,analyze_metadata,predict_dataset_origin,cross_dataset_metadata,metadata_bias_screening,metadata_within_dataset_analysis
+
 #STAGES=extract_metadata,analyze_metadata,preprocess_metadata
 #STAGES=final_evaluation,ablation_study,analyze_metadata
 #STAGES=all

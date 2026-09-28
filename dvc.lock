@@ -5,30 +5,37 @@ stages:
     outs:
     - path: .dvc-viewer/hashes
       hash: md5
-      md5: eac34c0b5ed8463ea2353d51f085df2f.dir
-      size: 9904
-      nfiles: 36
+      md5: 2933003e162b7709c002fdae530fed06.dir
+      size: 11362
+      nfiles: 44
   prepare_dataset:
     cmd: curl -C - -L 
       "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/Deepfakes.zip"
-      -o Deepfakes.zip && python -c "import zipfile, os; 
-      os.makedirs('data/raw/Hybrid_Deepfake_Dataset', exist_ok=True); 
-      print('Extracting dataset (forced)...'); zipfile.ZipFile('Deepfakes.zip', 
-      'r').extractall('data/raw/Hybrid_Deepfake_Dataset'); 
-      os.remove('Deepfakes.zip')"
+      -o Deepfakes.zip && curl -C - -L 
+      "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/DeeperForensics.zip"
+      -o DeeperForensics.zip && python scripts/prepare_dataset.py
+    deps:
+    - path: .dvc-viewer/hashes/prepare_dataset.hash
+      hash: md5
+      md5: e0d6e4253af2a6c95ab804b2cc691a0e
+      size: 64
+    - path: scripts/prepare_dataset.py
+      hash: md5
+      md5: d0f93bde3b599dfcbc57231a0fe2f4f9
+      size: 966
     outs:
     - path: data/raw/Hybrid_Deepfake_Dataset
       hash: md5
-      md5: a4d0e04eb88b0b8229c53e9fab22aa88.dir
-      size: 8245516224
-      nfiles: 2009
+      md5: d1ab1387551d5b4e496879f29928e850.dir
+      size: 8330399109
+      nfiles: 2007
   catalog:
     cmd: echo "force-fix" && python scripts/run_create_catalog.py --config 
       config/full.yaml
     deps:
     - path: .dvc-viewer/hashes/catalog.hash
       hash: md5
-      md5: 6ce7e0e44509f59ddb93bd622038f8a4
+      md5: 29fb8b37c9a7f519edbf9a7daf11dd33
       size: 64
     - path: config/full.yaml
       hash: md5
@@ -41,8 +48,8 @@ stages:
     outs:
     - path: dataset_inventory.csv
       hash: md5
-      md5: 5f63242b3a462725086836d9c494a188
-      size: 158136
+      md5: 5ebf2ea12cb0a9dc395c0bf5af7f6bc6
+      size: 171936
   extract_frames:
     cmd: python scripts/run_extract_frames.py --config config/full.yaml
     deps:
@@ -56,8 +63,8 @@ stages:
       size: 1134
     - path: dataset_inventory.csv
       hash: md5
-      md5: 5f63242b3a462725086836d9c494a188
-      size: 158136
+      md5: 5ebf2ea12cb0a9dc395c0bf5af7f6bc6
+      size: 171936
     - path: scripts/run_extract_frames.py
       hash: md5
       md5: 4cca7dda8375384a63247d8918f0d715
@@ -65,8 +72,8 @@ stages:
     outs:
     - path: data/ExtractedFrames/
       hash: md5
-      md5: c19a0d9aa36763fd577efce914743feb.dir
-      size: 10204911519
+      md5: 6511b6a1b7c57c1f15678a1d5b026a36.dir
+      size: 10111245359
       nfiles: 49976
   extract_regions:
     cmd: python scripts/run_extract_multi_regions.py --config config/full.yaml
@@ -81,8 +88,8 @@ stages:
       size: 1134
     - path: data/ExtractedFrames/
       hash: md5
-      md5: c19a0d9aa36763fd577efce914743feb.dir
-      size: 10204911519
+      md5: 6511b6a1b7c57c1f15678a1d5b026a36.dir
+      size: 10111245359
       nfiles: 49976
     - path: scripts/run_extract_multi_regions.py
       hash: md5
@@ -91,9 +98,9 @@ stages:
     outs:
     - path: data/MultiRegionFrames/
       hash: md5
-      md5: d1896079623589d1bebfe82e6aa912e7.dir
-      size: 2097000102
-      nfiles: 140513
+      md5: 44028f5cf48a4347ffe2781a4ccb8edb.dir
+      size: 2103505993
+      nfiles: 140547
   extract_handcrafted:
     cmd: python scripts/run_extract_handcrafted_features.py --config 
       config/full.yaml
@@ -207,8 +214,8 @@ stages:
       size: 1134
     - path: dataset_inventory.csv
       hash: md5
-      md5: 5f63242b3a462725086836d9c494a188
-      size: 158136
+      md5: 5ebf2ea12cb0a9dc395c0bf5af7f6bc6
+      size: 171936
     - path: scripts/run_extract_metadata.py
       hash: md5
       md5: 9c474d2e9ee66d64d3f3b2ebe4a961e5
@@ -216,8 +223,8 @@ stages:
     outs:
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 807274925b0c02fa20f41f23b3f3ff2f
-      size: 257112
+      md5: e7918eea71a514a17d5f028c4c4f2de1
+      size: 263970
   analyze_metadata:
     cmd: python scripts/analyze_metadata.py --config config/full.yaml
     deps:
@@ -231,8 +238,8 @@ stages:
       size: 1134
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 807274925b0c02fa20f41f23b3f3ff2f
-      size: 257112
+      md5: e7918eea71a514a17d5f028c4c4f2de1
+      size: 263970
     - path: scripts/analyze_metadata.py
       hash: md5
       md5: 1acc324fd340bdd21c2ba0a4fe5ff3be
@@ -240,8 +247,8 @@ stages:
     outs:
     - path: reports/metadata_analysis.json
       hash: md5
-      md5: ce637a4e8541a197cdff03d99db9bd41
-      size: 209
+      md5: 20be9d383f4f61d8f028c45451d9cf9e
+      size: 220
   preprocess_metadata:
     cmd: python scripts/preprocess_metadata.py --config config/full.yaml
     deps:
@@ -255,8 +262,8 @@ stages:
       size: 1134
     - path: features/metadata/raw_metadata_features.csv
       hash: md5
-      md5: 807274925b0c02fa20f41f23b3f3ff2f
-      size: 257112
+      md5: e7918eea71a514a17d5f028c4c4f2de1
+      size: 263970
     - path: scripts/preprocess_metadata.py
       hash: md5
       md5: 729d4d32e54286d0cf8d8bde73605403
@@ -264,8 +271,8 @@ stages:
     outs:
     - path: features/metadata/metadata_preprocessed
       hash: md5
-      md5: 3c664b8bb4b7b9ca48a14fac20c2f2bb.dir
-      size: 358476
+      md5: 2a3639468e1850d0ba9d9500fef26ed5.dir
+      size: 360709
       nfiles: 3
   align_features:
     cmd: python scripts/run_align_features.py --config config/full.yaml
@@ -447,27 +454,22 @@ stages:
     deps:
     - path: .dvc-viewer/hashes/ablation_study.hash
       hash: md5
-      md5: b03700e857bc86d54cde2613b3a9dbb8
+      md5: 823e78abc4525af83bc92001507c5bfc
       size: 64
     - path: config/full.yaml
       hash: md5
       md5: d5c0bb23d7438b85d91905ac68cf6dba
       size: 1134
-    - path: data/splits/
-      hash: md5
-      md5: f7b993ceed142a5115d2e45bee65a840.dir
-      size: 197662
-      nfiles: 7
     - path: features/aligned/aligned_all_features.csv
       hash: md5
       md5: 90a29cecfed1e23db00ad7e531515deb
       size: 293538012
     - path: scripts/run_ablation_study.py
       hash: md5
-      md5: 2e1c1eeeaffb213e78b76ef7ce61dc3c
-      size: 14671
+      md5: 097cbf957df668ed1d8b764a77b8feed
+      size: 14765
     outs:
-    - path: results/pilot/ablation
+    - path: results/full/ablation
       hash: md5
       md5: 350bd072d59c0113fd18d2ee003a7f18.dir
       size: 343213
@@ -479,3 +481,104 @@ stages:
       hash: md5
       md5: e0129c0cbdf0e60b12e5cacb04385542
       size: 64
+  predict_dataset_origin:
+    cmd: mkdir -p results && python scripts/run_dataset_origin_test.py > 
+      results/dataset_origin_report.txt
+    deps:
+    - path: .dvc-viewer/hashes/predict_dataset_origin.hash
+      hash: md5
+      md5: a121f92bd360bc3b1db37fc712ca4cd9
+      size: 64
+    - path: dataset_inventory.csv
+      hash: md5
+      md5: 5f63242b3a462725086836d9c494a188
+      size: 158136
+    - path: features/aligned/aligned_metadata.csv
+      hash: md5
+      md5: a15b50345c1cf4247cce1d04cd732a61
+      size: 341649
+    - path: scripts/run_dataset_origin_test.py
+      hash: md5
+      md5: a027f6548b1f17297dc02511a02cf579
+      size: 3484
+    outs:
+    - path: results/dataset_origin_report.txt
+      hash: md5
+      md5: 385aa9dd2fb5e6c9b682958cce382771
+      size: 1203
+  cross_dataset_metadata:
+    cmd: python scripts/run_cross_dataset_metadata.py
+    deps:
+    - path: .dvc-viewer/hashes/cross_dataset_metadata.hash
+      hash: md5
+      md5: f6b385c1462b15dd2ed7b4a77f61bcaf
+      size: 64
+    - path: dataset_inventory.csv
+      hash: md5
+      md5: 5f63242b3a462725086836d9c494a188
+      size: 158136
+    - path: features/aligned/aligned_metadata.csv
+      hash: md5
+      md5: a15b50345c1cf4247cce1d04cd732a61
+      size: 341649
+    - path: scripts/run_cross_dataset_metadata.py
+      hash: md5
+      md5: b31ebd25ed3de358000580f87fd4e267
+      size: 4878
+    outs:
+    - path: results/cross_dataset_metadata_results.csv
+      hash: md5
+      md5: 70bf9ec65f6faa29165ffe585dee955c
+      size: 301
+  metadata_bias_screening:
+    cmd: mkdir -p results && python scripts/run_metadata_bias_screening.py
+    deps:
+    - path: .dvc-viewer/hashes/metadata_bias_screening.hash
+      hash: md5
+      md5: 4205dfaa9aeaa31959d73c70394bc4e3
+      size: 64
+    - path: dataset_inventory.csv
+      hash: md5
+      md5: 5f63242b3a462725086836d9c494a188
+      size: 158136
+    - path: features/aligned/aligned_metadata.csv
+      hash: md5
+      md5: a15b50345c1cf4247cce1d04cd732a61
+      size: 341649
+    - path: scripts/run_metadata_bias_screening.py
+      hash: md5
+      md5: d45dbeb282bf5486d435e051fcfd1a32
+      size: 7289
+    outs:
+    - path: results/metadata_bias_screening.csv
+      hash: md5
+      md5: d64e107a19967390ceded925a8bb1ccf
+      size: 1417
+  metadata_within_dataset_analysis:
+    cmd: python scripts/run_metadata_within_dataset_analysis.py
+    deps:
+    - path: .dvc-viewer/hashes/metadata_within_dataset_analysis.hash
+      hash: md5
+      md5: 48762c9bac3a0e3de92b181f15b326c5
+      size: 64
+    - path: dataset_inventory.csv
+      hash: md5
+      md5: 5f63242b3a462725086836d9c494a188
+      size: 158136
+    - path: features/aligned/aligned_metadata.csv
+      hash: md5
+      md5: a15b50345c1cf4247cce1d04cd732a61
+      size: 341649
+    - path: scripts/run_metadata_within_dataset_analysis.py
+      hash: md5
+      md5: 78345804579f8045fdefb15f44fb137c
+      size: 6051
+    outs:
+    - path: results/metadata_within_dataset_analysis.csv
+      hash: md5
+      md5: 4028cff59f3b673b3bc200a9a14ca835
+      size: 3935
+    - path: results/metadata_within_dataset_summary.csv
+      hash: md5
+      md5: 6370a0483be4b0013480e7d871ec1027
+      size: 832
