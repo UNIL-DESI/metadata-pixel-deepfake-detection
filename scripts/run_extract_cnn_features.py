@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 import yaml
 
+sys.path = [p for p in sys.path if "dvc-viewer" not in p]
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 from features.cnn_models import get_cnn_model
