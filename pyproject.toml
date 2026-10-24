@@ -6,7 +6,7 @@ authors = [
     { name = "Dinithi", email = "dinithiperera0904@gmail.com" }
 ]
 dependencies = [
-    "numpy",
+    "numpy>=1.26,<2.1",
     "pandas",
     "scipy",
     "scikit-learn",
@@ -20,12 +20,13 @@ dependencies = [
     "requests",
     "ipykernel",
     "jupyterlab",
-    "dvc-gdrive",
-    "tensorflow",
+    "huggingface_hub>=0.27",
+    "tensorflow[and-cuda]==2.20.0",
     "seaborn",
     "static-ffmpeg>=3.0",
     "cryptography==41.0.7",
-    "pyopenssl >= 23.2.0"
+    "pyopenssl >= 23.2.0",
+    "joblib"
 ]
 
 [tool.cluster-ci]

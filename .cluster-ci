@@ -13,7 +13,7 @@
 # ── Resource Requirements ──
 REQUIRED_RAM=32GB
 REQUIRED_VRAM=24GB
-MAX_RUNTIME_HOURS=24
+MAX_RUNTIME_HOURS=2
 
 # ── Execution Control ──
 #STAGES=prepare_dataset,catalog,extract_metadata,preprocess_metadata,analyze_metadata,predict_dataset_origin,cross_dataset_metadata,metadata_bias_screening,metadata_within_dataset_analysis
@@ -25,4 +25,4 @@ MAX_RUNTIME_HOURS=24
 STAGES=gpu_smoke_test
 
 # ── Docker ──
-DOCKER_IMAGE=nvcr.io/nvidia/tensorflow:25.02-tf2-py3
+DOCKER_IMAGE=nvcr.io/nvidia/pytorch:25.02-py3
