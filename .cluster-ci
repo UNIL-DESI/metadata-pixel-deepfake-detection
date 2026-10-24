@@ -21,6 +21,8 @@ MAX_RUNTIME_HOURS=24
 #STAGES(original)=dvc-code-analysis, prepare_dataset, catalog, extract_frames, extract_regions, extract_handcrafted, aggregate_handcrafted, extract_cnn, aggregate_cnn, extract_metadata,analyze_metadata,preprocess_metadata, align_features, split_dataset, feature_selection,train_models, final_evaluation
 #STAGES(supported)=metadata_within_dataset_analysis, metadata_bias_screening, cross_dataset_metadata, predict_dataset_origin, ablation_study, feature_analysis 
 #STAGES=all
-STAGES=hybrid_hybrid_pilot_001
+#STAGES=hybrid_hybrid_pilot_001
+STAGES=gpu_smoke_test
 
 # ── Docker ──
+DOCKER_IMAGE=nvcr.io/nvidia/tensorflow:25.02-tf2-py3

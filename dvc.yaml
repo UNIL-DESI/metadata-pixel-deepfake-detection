@@ -234,3 +234,14 @@ stages:
     plots:
     - results/hybrid_pilot_001/comparison.csv:
         cache: false
+
+  gpu_smoke_test:
+    cmd: python -u scripts/check_tensorflow_gpu.py
+    deps:
+      - scripts/check_tensorflow_gpu.py
+    metrics:
+      - results/gpu_check/status.json:
+          cache: false
+    outs:
+      - results/gpu_check/diagnostics.log:
+          cache: false
