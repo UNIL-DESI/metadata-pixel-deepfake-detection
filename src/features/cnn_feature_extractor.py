@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import gc
-import tensorflow.keras.backend as K
 
 from tensorflow.keras.applications.mobilenet_v2 import (
     preprocess_input as mobilenet_preprocess
@@ -56,8 +55,8 @@ def process_and_save_batch(batch_images, batch_metadata, model, preprocess_func,
     
     # Force memory cleanup
     del batch_rows, batch_df, batch_array, batch_features
-    K.clear_session()
-    gc.collect()
+    # Do not clear the active model's Keras session between batches.
+    # Clearing here can disrupt performance/state; caller may clear after extraction.
 
 def extract_features(model, image_paths, model_name, output_csv, image_size=224, batch_size=16):
     if model_name.lower() == "mobilenetv2":

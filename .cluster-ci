@@ -16,10 +16,11 @@ REQUIRED_VRAM=24GB
 MAX_RUNTIME_HOURS=24
 
 # ── Execution Control ──
-STAGES=prepare_dataset,catalog,extract_metadata,preprocess_metadata,analyze_metadata,predict_dataset_origin,cross_dataset_metadata,metadata_bias_screening,metadata_within_dataset_analysis
+#STAGES=prepare_dataset,catalog,extract_metadata,preprocess_metadata,analyze_metadata,predict_dataset_origin,cross_dataset_metadata,metadata_bias_screening,metadata_within_dataset_analysis
 
-#STAGES=extract_metadata,analyze_metadata,preprocess_metadata
-#STAGES=final_evaluation,ablation_study,analyze_metadata
+#STAGES(original)=dvc-code-analysis, prepare_dataset, catalog, extract_frames, extract_regions, extract_handcrafted, aggregate_handcrafted, extract_cnn, aggregate_cnn, extract_metadata,analyze_metadata,preprocess_metadata, align_features, split_dataset, feature_selection,train_models, final_evaluation
+#STAGES(supported)=metadata_within_dataset_analysis, metadata_bias_screening, cross_dataset_metadata, predict_dataset_origin, ablation_study, feature_analysis 
 #STAGES=all
+STAGES=hybrid_hybrid_pilot_001
 
 # ── Docker ──

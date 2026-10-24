@@ -44,7 +44,7 @@ def load_data(input_path):
             f"Input file not found:\n{input_path}"
         )
 
-    df = pd.read_csv(input_path)
+    df = pd.read_csv(input_path, dtype={"media_id": str})
     print(f"\nDataset shape: {df.shape}")
 
     check_required_columns(df)
@@ -105,57 +105,51 @@ def prepare_features(df):
 
 
 def create_data_split(df, val_size, test_size, random_state):
-    print_header("CREATING 70 / 15 / 15 DATA SPLIT")
+    """Use the one authoritative inventory split, never split aligned data again."""
+    print_header("LOADING EXISTING TRAIN / VALIDATION / TEST SPLIT")
 
-    train_df, temp_df = train_test_split(
-        df,
-        test_size=(val_size + test_size),
-        stratify=df["label"],
-        random_state=random_state
-    )
+    id_paths = {
+        "train": Path("data/splits/train_ids.csv"),
+        "validation": Path("data/splits/validation_ids.csv"),
+        "test": Path("data/splits/test_ids.csv"),
+    }
+    split_ids = {}
+    for split_name, path in id_paths.items():
+        if not path.is_file():
+            raise FileNotFoundError(
+                f"Missing split file: {path}. Run run_split_dataset.py first."
+            )
+        id_df = pd.read_csv(path, dtype={"media_id": str})
+        if "media_id" not in id_df.columns or id_df["media_id"].isna().any():
+            raise ValueError(f"Invalid split file: {path}")
+        ids = id_df["media_id"].str.strip()
+        if ids.duplicated().any():
+            raise ValueError(f"Duplicate IDs in {path}")
+        split_ids[split_name] = set(ids)
 
-    validation_df, test_df = train_test_split(
-        temp_df,
-        test_size=0.5,
-        stratify=temp_df["label"],
-        random_state=random_state
-    )
+    if (split_ids["train"] & split_ids["validation"]
+            or split_ids["train"] & split_ids["test"]
+            or split_ids["validation"] & split_ids["test"]):
+        raise ValueError("Split IDs overlap.")
 
-    print(
-        f"Train:      {len(train_df)} "
-        f"({len(train_df) / len(df) * 100:.1f}%)"
-    )
-    print(
-        f"Validation: {len(validation_df)} "
-        f"({len(validation_df) / len(df) * 100:.1f}%)"
-    )
-    print(
-        f"Test:       {len(test_df)} "
-        f"({len(test_df) / len(df) * 100:.1f}%)"
-    )
+    df = df.copy()
+    if df["media_id"].isna().any():
+        raise ValueError("Aligned data has missing media_id values.")
+    df["media_id"] = df["media_id"].astype(str).str.strip()
+    if set(df["media_id"]) != set().union(*split_ids.values()):
+        raise ValueError("Aligned feature IDs do not match saved split IDs.")
 
-    print("\nTrain label distribution:")
-    print(train_df["label"].value_counts())
+    train_df = df[df["media_id"].isin(split_ids["train"])].copy()
+    validation_df = df[df["media_id"].isin(split_ids["validation"])].copy()
+    test_df = df[df["media_id"].isin(split_ids["test"])].copy()
 
-    print("\nValidation label distribution:")
-    print(validation_df["label"].value_counts())
+    for name, part in (("Train", train_df), ("Validation", validation_df), ("Test", test_df)):
+        print(f"{name}: {len(part)} videos ({len(part) / len(df):.1%})")
+        print(part["label"].value_counts())
+        if part.empty:
+            raise ValueError(f"{name} split is empty.")
 
-    print("\nTest label distribution:")
-    print(test_df["label"].value_counts())
-
-    train_ids = set(train_df["media_id"])
-    val_ids = set(validation_df["media_id"])
-    test_ids = set(test_df["media_id"])
-
-    if train_ids & val_ids:
-        raise ValueError("Train/validation ID overlap detected.")
-    if train_ids & test_ids:
-        raise ValueError("Train/test ID overlap detected.")
-    if val_ids & test_ids:
-        raise ValueError("Validation/test ID overlap detected.")
-
-    print("\n✓ No ID overlap between splits.")
-
+    print("\n✓ Reused inventory split; no re-splitting performed.")
     return train_df, validation_df, test_df
 
 

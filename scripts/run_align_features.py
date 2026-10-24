@@ -77,10 +77,10 @@ def main():
 
     print("\nLoading feature files...")
 
-    handcrafted = pd.read_csv(handcrafted_path)
-    cnn = pd.read_csv(cnn_path)
-    metadata = pd.read_csv(metadata_path)
-    inventory = pd.read_csv(inventory_path)
+    handcrafted = pd.read_csv(handcrafted_path, dtype={"video_name": str})
+    cnn = pd.read_csv(cnn_path, dtype={"video_id": str})
+    metadata = pd.read_csv(metadata_path, dtype={"media_id": str})
+    inventory = pd.read_csv(inventory_path, dtype={"video_name": str})
 
     print(f"Handcrafted shape: {handcrafted.shape}")
     print(f"CNN shape:         {cnn.shape}")

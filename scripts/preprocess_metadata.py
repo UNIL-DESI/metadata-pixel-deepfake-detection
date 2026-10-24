@@ -4,6 +4,7 @@ import argparse
 import os
 from pathlib import Path
 import sys
+import joblib
 import numpy as np
 import pandas as pd
 import yaml
@@ -22,7 +23,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 def load_metadata(input_file):
     print("\nLoading metadata...")
-    df = pd.read_csv(input_file)
+    df = pd.read_csv(input_file, dtype={"media_id": str})
     print(f"Rows: {len(df)}")
     print(f"Columns: {len(df.columns)}")
     return df
@@ -254,6 +255,13 @@ def main():
 
     df = load_metadata(input_file)
     df = clean_missing_values(df)
+    if "media_id" not in df.columns:
+        raise ValueError("Raw metadata does not contain media_id.")
+    if df["media_id"].isna().any():
+        raise ValueError("Raw metadata contains missing media_id values.")
+    df["media_id"] = df["media_id"].astype(str).str.strip()
+    if df["media_id"].duplicated().any():
+        raise ValueError("Raw metadata contains duplicate media_id values.")
     X, y = separate_target(df)
 
     print("\nTarget distribution:")
@@ -274,8 +282,50 @@ def main():
         categorical_features
     )
 
-    print("\nApplying preprocessing...")
-    X_processed = preprocessor.fit_transform(X)
+    # Data splits must already exist and must match raw metadata IDs.
+    # The training split alone determines preprocessing statistics and categories.
+    split_dir = Path("data/splits")
+    split_files = {
+        "train": split_dir / "train_ids.csv",
+        "validation": split_dir / "validation_ids.csv",
+        "test": split_dir / "test_ids.csv",
+    }
+    split_ids = {}
+    for name, split_path in split_files.items():
+        if not split_path.is_file():
+            raise FileNotFoundError(
+                f"Missing {name} split: {split_path}. "
+                "Run scripts/run_split_dataset.py first."
+            )
+        ids_df = pd.read_csv(split_path, dtype={"media_id": str})
+        if "media_id" not in ids_df.columns or ids_df["media_id"].isna().any():
+            raise ValueError(f"Invalid split IDs in {split_path}")
+        ids = ids_df["media_id"].str.strip()
+        if ids.duplicated().any():
+            raise ValueError(f"Duplicate IDs in {split_path}")
+        split_ids[name] = set(ids)
+
+    if (split_ids["train"] & split_ids["validation"]
+            or split_ids["train"] & split_ids["test"]
+            or split_ids["validation"] & split_ids["test"]):
+        raise ValueError("Overlapping IDs between dataset splits.")
+    union_ids = set().union(*split_ids.values())
+    actual_ids = set(df["media_id"])
+    if union_ids != actual_ids:
+        raise ValueError(
+            "Split IDs and metadata IDs differ: "
+            f"missing from metadata={sorted(union_ids-actual_ids)[:10]}, "
+            f"missing from splits={sorted(actual_ids-union_ids)[:10]}"
+        )
+    train_mask = df["media_id"].isin(split_ids["train"])
+    if not train_mask.any():
+        raise ValueError("No training metadata rows found.")
+
+    print("\nFitting metadata preprocessor on TRAINING rows only...")
+    preprocessor.fit(X.loc[train_mask])
+    print("Transforming every row using training-fitted parameters...")
+    X_processed = preprocessor.transform(X)
+    joblib.dump(preprocessor, Path(output_dir) / "metadata_preprocessor.joblib")
 
     print(
         f"Original feature count: {X.shape[1]}"
@@ -327,7 +377,7 @@ def main():
         encoding="utf-8"
     ) as f:
         f.write(
-            "METADATA PREPROCESSING INFORMATION\n"
+            "METADATA PREPROCESSING INFORMATION (TRAIN-FITTED)\n"
         )
         f.write("=" * 50 + "\n\n")
         f.write(

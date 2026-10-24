@@ -1,0 +1,66 @@
+# FULL: 25 frames/video, all five feature groups, dataset from HF prepare_dataset stage
+experiment_id: hybrid_001
+datasets:
+- name: FF++
+  root: data/raw/Hybrid_Deepfake_Dataset/FF++
+  folders:
+    real:
+    - Real
+    - real
+    - RealVideos
+    - real_videos
+    fake:
+    - Fake
+    - fake
+    - FakeVideos
+    - fake_videos
+- name: Celeb-DF
+  root: data/raw/Hybrid_Deepfake_Dataset/Celeb-DF
+  folders:
+    real:
+    - Real
+    - real
+    - RealVideos
+    - real_videos
+    fake:
+    - Fake
+    - fake
+    - FakeVideos
+    - fake_videos
+- name: DFDC
+  root: data/raw/Hybrid_Deepfake_Dataset/DFDC
+  folders:
+    real:
+    - Real
+    - real
+    - RealVideos
+    - real_videos
+    fake:
+    - Fake
+    - fake
+    - FakeVideos
+    - fake_videos
+frames_per_video: 25
+region_size: 224
+expanded_face_scale: 1.5
+cnn_model: mobilenetv2
+cnn_regions:
+- full
+- face
+- expanded
+cnn_batch_size: 16
+random_seed: 42
+val_fraction: 0.15
+test_fraction: 0.15
+rf_trees: 300
+handcrafted_features:
+  lbp: true
+  glcm: true
+  dct: true
+  color: true
+  edge: true
+cnn_weights: imagenet
+cnn_pooling: avg
+metadata:
+  use_ffprobe: true
+  optional_exiftool: true

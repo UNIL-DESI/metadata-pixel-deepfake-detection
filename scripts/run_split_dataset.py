@@ -45,7 +45,7 @@ def main():
     print("\nLoading dataset inventory...")
     print(inventory_path)
 
-    df = pd.read_csv(inventory_path)
+    df = pd.read_csv(inventory_path, dtype={"video_name": str})
 
     print(f"\nTotal videos: {len(df)}")
     print("\nOriginal label distribution:")
@@ -55,7 +55,6 @@ def main():
         df["video_name"]
         .astype(str)
         .str.strip()
-        .str.replace(r"\.mp4$", "", regex=True)
     )
 
     duplicates = df["media_id"].duplicated().sum()
