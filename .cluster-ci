@@ -22,7 +22,7 @@ MAX_RUNTIME_HOURS=2
 #STAGES(supported)=metadata_within_dataset_analysis, metadata_bias_screening, cross_dataset_metadata, predict_dataset_origin, ablation_study, feature_analysis 
 #STAGES=all
 #STAGES=hybrid_hybrid_pilot_001
-STAGES=gpu_smoke_test
+#STAGES=gpu_smoke_test
 
 # ── Docker ──
 DOCKER_IMAGE=nvcr.io/nvidia/pytorch:25.02-py3
