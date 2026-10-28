@@ -7,15 +7,16 @@ stages:
     - .dvc-viewer/hashes: {cache: false}
   
   prepare_dataset:
-    cmd: curl -C - -L "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/Deepfakes.zip"
-      -o Deepfakes.zip && curl -C - -L "https://huggingface.co/datasets/dinithiKP/Deepfakes/resolve/main/DeeperForensics.zip"
-      -o DeeperForensics.zip && python scripts/prepare_dataset.py
-    deps: [scripts/prepare_dataset.py, .dvc-viewer/hashes/prepare_dataset.hash]
+    # Downloads Deepfakes.zip with huggingface_hub (HF_TOKEN from the repo
+    # secrets if the dataset is private) and unpacks FF++, Celeb-DF and DFDC.
+    cmd: python scripts/prepare_dataset_hf.py
+    deps: [scripts/prepare_dataset_hf.py, .dvc-viewer/hashes/prepare_dataset.hash]
     outs: [data/raw/Hybrid_Deepfake_Dataset]
   
   catalog:
     cmd: echo "force-fix" && python scripts/run_create_catalog.py --config config/full.yaml
-    deps: [scripts/run_create_catalog.py, config/full.yaml, .dvc-viewer/hashes/catalog.hash]
+    deps: [scripts/run_create_catalog.py, config/full.yaml, data/raw/Hybrid_Deepfake_Dataset,
+      .dvc-viewer/hashes/catalog.hash]
     metrics:
     - dataset_inventory.csv: {cache: false}
   
@@ -74,7 +75,7 @@ stages:
     cmd: python scripts/preprocess_metadata.py --config config/full.yaml
     always_changed: true
     deps: [scripts/preprocess_metadata.py, config/full.yaml, features/metadata/raw_metadata_features.csv,
-      .dvc-viewer/hashes/preprocess_metadata.hash]
+      data/splits/, .dvc-viewer/hashes/preprocess_metadata.hash]
     outs: [features/metadata/metadata_preprocessed]
   
   align_features:
@@ -82,7 +83,7 @@ stages:
     always_changed: true
     deps: [scripts/run_align_features.py, config/full.yaml, features/handcrafted/handcrafted_video_features.csv,
       features/CNNFeatures/mobilenetv2_video_features.csv, features/metadata/metadata_preprocessed,
-      .dvc-viewer/hashes/align_features.hash]
+      dataset_inventory.csv, .dvc-viewer/hashes/align_features.hash]
     outs: [features/aligned]
   
   feature_analysis:
@@ -94,7 +95,7 @@ stages:
   
   split_dataset:
     cmd: python scripts/run_split_dataset.py --config config/full.yaml
-    deps: [scripts/run_split_dataset.py, config/full.yaml, features/aligned/aligned_all_features.csv,
+    deps: [scripts/run_split_dataset.py, config/full.yaml, dataset_inventory.csv,
       .dvc-viewer/hashes/split_dataset.hash]
     outs: [data/splits/]
   
@@ -110,14 +111,16 @@ stages:
       .dvc-viewer/hashes/train_models.hash]
     outs: [models/]
     metrics:
-    - results/pilot/best_model_validation.json: {cache: false}
+    - results/full/best_model_validation.json: {cache: false}
   
   final_evaluation:
     cmd: python scripts/run_final_evaluation.py --config config/full.yaml
-    deps: [scripts/run_final_evaluation.py, config/full.yaml, models/, data/splits/,
+    deps: [scripts/run_final_evaluation.py, scripts/run_train_models.py, config/full.yaml,
+      models/, features/selected, results/full/best_model_validation.json,
       .dvc-viewer/hashes/final_evaluation.hash]
+    outs: [models_final/]
     metrics:
-    - results/pilot/final_test_metrics.json: {cache: false}
+    - results/full/final_test_metrics.json: {cache: false}
   
   ablation_study:
     cmd: python scripts/run_ablation_study.py --config config/full.yaml
@@ -155,57 +158,22 @@ stages:
     - results/metadata_within_dataset_analysis.csv: {cache: false}
     - results/metadata_within_dataset_summary.csv: {cache: false}
 
-  visual_visual_001:
-    cmd: python -u scripts/run_visual_experiment.py --config config/experiments/visual_001.yaml --resume
-    deps:
-    - config/experiments/visual_001.yaml
-    - scripts/run_visual_experiment.py
-    - src/preprocessing
-    - src/features
-    outs:
-    - experiments/visual_001/artifacts
-    metrics:
-    - results/visual_001/metrics.json:
-        cache: false
-    - results/visual_001/run_status.json:
-        cache: false
-    plots:
-    - results/visual_001/comparison.csv:
-        cache: false
-    - results/visual_001/best_test_confusion_matrix.png:
-        cache: false
-        
-  visual_visual_pilot_001:
-    cmd: python -u scripts/run_visual_experiment.py --config config/experiments/visual_pilot_001.yaml --resume
-    deps:
-    - config/experiments/visual_pilot_001.yaml
-    - scripts/run_visual_experiment.py
-    - src/preprocessing
-    - src/features
-    outs:
-    - experiments/visual_pilot_001/artifacts
-    metrics:
-    - results/visual_pilot_001/metrics.json:
-        cache: false
-    - results/visual_pilot_001/run_status.json:
-        cache: false
-    plots:
-    - results/visual_pilot_001/comparison.csv:
-        cache: false
-    - results/visual_pilot_001/best_test_confusion_matrix.png:
-        cache: false
-
   hybrid_hybrid_001:
     cmd: python -u scripts/run_hybrid_experiment.py --config config/experiments/hybrid_001.yaml --resume
     deps:
     - config/experiments/hybrid_001.yaml
     - scripts/run_hybrid_experiment.py
     - scripts/run_hybrid_metadata.py
+    - scripts/preprocess_metadata.py
     - src/preprocessing
     - src/features
+    - src/metadata
     - data/raw/Hybrid_Deepfake_Dataset
     outs:
-    - experiments/hybrid_001/artifacts
+    # persist: DVC keeps the folder between runs, so --resume can reuse
+    # the videos an interrupted run already processed.
+    - experiments/hybrid_001/artifacts:
+        persist: true
     metrics:
     - results/hybrid_001/metrics.json:
         cache: false
@@ -221,11 +189,16 @@ stages:
     - config/experiments/hybrid_pilot_001.yaml
     - scripts/run_hybrid_experiment.py
     - scripts/run_hybrid_metadata.py
+    - scripts/preprocess_metadata.py
     - src/preprocessing
     - src/features
+    - src/metadata
     - data/raw/Hybrid_Deepfake_Dataset
     outs:
-    - experiments/hybrid_pilot_001/artifacts
+    # persist: DVC keeps the folder between runs, so --resume can reuse
+    # the videos an interrupted run already processed.
+    - experiments/hybrid_pilot_001/artifacts:
+        persist: true
     metrics:
     - results/hybrid_pilot_001/metrics.json:
         cache: false
@@ -236,9 +209,10 @@ stages:
         cache: false
 
   gpu_smoke_test:
-    cmd: python -u scripts/check_tensorflow_gpu.py
+    cmd: python -u scripts/check_gpu.py
     deps:
-      - scripts/check_tensorflow_gpu.py
+      - scripts/check_gpu.py
+      - src/features/cnn_models.py
     metrics:
       - results/gpu_check/status.json:
           cache: false

@@ -12,8 +12,12 @@
 # =========================================================================================
 # ── Resource Requirements ──
 REQUIRED_RAM=32GB
-REQUIRED_VRAM=24GB
+REQUIRED_VRAM=8GB
 MAX_RUNTIME_HOURS=2
+
+# isipol09 (x86, RTX 3090) is the worker this repo has always run on, and the
+# image below is matched to its driver. The ARM GB10 workers need another image.
+ALLOWED_WORKERS=isipol09
 
 # ── Execution Control ──
 #STAGES=prepare_dataset,catalog,extract_metadata,preprocess_metadata,analyze_metadata,predict_dataset_origin,cross_dataset_metadata,metadata_bias_screening,metadata_within_dataset_analysis
@@ -22,7 +26,10 @@ MAX_RUNTIME_HOURS=2
 #STAGES(supported)=metadata_within_dataset_analysis, metadata_bias_screening, cross_dataset_metadata, predict_dataset_origin, ablation_study, feature_analysis 
 #STAGES=all
 #STAGES=hybrid_hybrid_pilot_001
-STAGES=gpu_smoke_test
+STAGES=hybrid_hybrid_pilot_001
 
 # ── Docker ──
-DOCKER_IMAGE=nvcr.io/nvidia/pytorch:25.02-py3
+# 25.06 matches isipol09's driver (575.57.08, CUDA 12.9). Changing the image
+# also makes Cluster-CI rebuild the job volume, which clears the broken
+# dvc-viewer install left by a cancelled run.
+DOCKER_IMAGE_AMD64=nvcr.io/nvidia/pytorch:25.06-py3
