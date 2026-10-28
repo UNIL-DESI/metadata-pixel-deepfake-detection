@@ -235,6 +235,7 @@ __marimo__/
 # Anchored to the root so they don't also hide src/features or src/data.
 /data/
 /models/
+/models_final/
 /splits/
 /features/
 /experiments/

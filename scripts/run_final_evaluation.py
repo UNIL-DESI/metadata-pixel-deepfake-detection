@@ -92,7 +92,11 @@ def main() -> None:
     print(f"Fitting {best_name} on Train+Validation: {len(X_train_val)} videos")
     print(f"Test remains held out: {len(test)} videos")
     selected_pipeline.fit(X_train_val, y_train_val)
-    final_model_path = model_dir / f"final_{best_name}.joblib"
+    # Not under models/: that folder is train_models' DVC output, and writing
+    # into it here would make DVC see train_models as changed on every run.
+    final_dir = Path("models_final")
+    final_dir.mkdir(parents=True, exist_ok=True)
+    final_model_path = final_dir / f"final_{best_name}.joblib"
     joblib.dump(selected_pipeline, final_model_path)
     # The final .joblib file includes the imputer/scaler/classifier pipeline.
     # No separate scaler joblib is necessary for LR/SVM; RF has no scaler.
