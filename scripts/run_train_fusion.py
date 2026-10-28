@@ -7,7 +7,7 @@ import yaml
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
-from deepfake_detection.models.train_fusion import train_random_forest
+from models.train_fusion import train_random_forest
 
 
 def main():
@@ -27,9 +27,9 @@ def main():
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
 
-    base_dir = config["dataset"]["base_dir"]
-    default_features_csv = str(Path(base_dir) / "features" / "selected" / "train_selected_160.csv")
-    default_model_output = str(Path(base_dir) / "models" / "pilot" / "random_forest.joblib")
+    # feature_selection and train_models write to the project root, not the dataset folder.
+    default_features_csv = "features/selected/train_selected_160.csv"
+    default_model_output = "models/fusion/random_forest.joblib"
 
     parser.add_argument(
         "--features-csv",
