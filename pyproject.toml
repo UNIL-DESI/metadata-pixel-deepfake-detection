@@ -5,29 +5,44 @@ description = "Hybrid Deepfake Detection Research"
 authors = [
     { name = "Dinithi", email = "dinithiperera0904@gmail.com" }
 ]
+requires-python = ">=3.10"
+# Only what the cluster image (nvcr.io/nvidia/pytorch) lacks. Cluster-CI pins
+# everything already in the image, and when that pinned install fails it
+# retries with --ignore-installed, which would replace the image's CUDA build
+# of torch with PyPI's. So torch, numpy, pandas and the rest stay in `local`.
 dependencies = [
-    "numpy>=1.26,<2.1",
+    # Cluster-CI's injected dvc-code-analysis stage runs dvc-viewer inside the
+    # container; without it every run stops with "dvc-viewer: command not found".
+    "dvc-viewer @ git+https://github.com/UNIL-DESI/dvc-viewer.git",
+    # The image's torch is built against NumPy 1.x; the --ignore-installed retry
+    # would otherwise pull NumPy 2 into user-site and break `import torch`.
+    # (Python 3.13 has no NumPy 1.x wheels, so laptops on 3.13 skip the cap.)
+    "numpy<2; python_version < '3.13'",
+    "scikit-image",
+    "opencv-python-headless<5.0",
+    "seaborn",
+    "huggingface_hub>=0.27",
+    "static-ffmpeg>=3.0",
+]
+
+[project.optional-dependencies]
+# Everything the image already provides, for a laptop: uv sync --extra local
+local = [
+    "numpy>=1.26",
     "pandas",
     "scipy",
     "scikit-learn",
-    "scikit-image",
-    "opencv-python-headless<5.0",
     "pillow",
-    "imageio",
     "matplotlib",
     "tqdm",
     "pyyaml",
     "requests",
-    "ipykernel",
-    "jupyterlab",
-    "huggingface_hub>=0.27",
-    "tensorflow[and-cuda]==2.20.0",
-    "seaborn",
-    "static-ffmpeg>=3.0",
-    "cryptography==41.0.7",
-    "pyopenssl >= 23.2.0",
-    "joblib"
+    "joblib",
+    "torch",
+    "torchvision",
 ]
+notebook = ["ipykernel", "jupyterlab"]
+dev = ["pytest"]
 
 [tool.cluster-ci]
 managed = true

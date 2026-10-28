@@ -220,22 +220,21 @@ __marimo__/
 # Cluster-CI run logs
 .cluster-ci-logs/
 
-# Credentials
-gdrive-credentials.json
+# Credentials: never commit service-account keys or DVC remote secrets
+*credentials*.json
+.dvc/config.local
+.dvc/config.backup
 
 # Project specific files
 /Deepfakes.zip
 /dataset_inventory.csv
 
 # DVC Pipeline Outputs (Git must ignore these data folders!)
-models\
-data\
-features\
-results\
-reports\
-data/
-models/
-results/
-reports/
-splits/
-features/
+# results/ and reports/ stay tracked: DVC metrics and plots there are
+# committed back by the cluster bot. DVC adds its cached outputs itself.
+# Anchored to the root so they don't also hide src/features or src/data.
+/data/
+/models/
+/splits/
+/features/
+/experiments/
