@@ -236,9 +236,10 @@ stages:
         cache: false
 
   gpu_smoke_test:
-    cmd: python -u scripts/check_tensorflow_gpu.py
+    cmd: python -u scripts/check_gpu.py
     deps:
-      - scripts/check_tensorflow_gpu.py
+      - scripts/check_gpu.py
+      - src/features/cnn_models.py
     metrics:
       - results/gpu_check/status.json:
           cache: false

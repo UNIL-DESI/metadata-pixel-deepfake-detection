@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """Standalone GPU smoke test for the DVC Cluster-CI runner.
 
-Only checks NVIDIA driver/GPU visibility and a TensorFlow MobileNetV2
-forward pass. Never reads the dataset and never downloads ImageNet weights.
+Only checks NVIDIA driver/GPU visibility and a PyTorch MobileNetV2 forward
+pass through the project's own feature extractor. Never reads the dataset
+and never downloads ImageNet weights.
 All details go into results/gpu_check/diagnostics.log and status.json.
 """
 import json
-import os
 import subprocess
 import sys
 import traceback
 from datetime import datetime, timezone
 from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 OUT = Path("results/gpu_check")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -29,8 +31,8 @@ def main():
     report = {
         "status": "failed",
         "utc_time": datetime.now(timezone.utc).isoformat(),
-        "gpu_visible_to_tensorflow": False,
-        "tensorflow_mobilenetv2_inference_ok": False,
+        "gpu_visible_to_torch": False,
+        "torch_mobilenetv2_inference_ok": False,
     }
     try:
         probe = subprocess.run(
@@ -47,40 +49,33 @@ def main():
         write_log(f"nvidia-smi query failed: {exc}")
 
     try:
-        os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "1")
-        import tensorflow as tf
+        import numpy as np
+        import torch
+        from features.cnn_models import embed_images, get_cnn_model
 
-        report["tensorflow_version"] = tf.__version__
-        write_log(f"TensorFlow: {tf.__version__}")
-        gpus = tf.config.list_physical_devices("GPU")
-        report["tensorflow_gpu_devices"] = [str(gpu) for gpu in gpus]
-        report["gpu_visible_to_tensorflow"] = bool(gpus)
-        write_log(f"Physical GPUs: {report['tensorflow_gpu_devices']}")
-        if not gpus:
-            raise RuntimeError("No GPU visible to TensorFlow. Do not run the full pipeline.")
+        report["torch_version"] = torch.__version__
+        report["torch_cuda_version"] = torch.version.cuda
+        write_log(f"PyTorch: {torch.__version__} (CUDA {torch.version.cuda})")
+        report["gpu_visible_to_torch"] = torch.cuda.is_available()
+        if not torch.cuda.is_available():
+            raise RuntimeError("No GPU visible to PyTorch. Do not run the full pipeline.")
+        device = torch.device("cuda:0")
+        report["torch_gpu_name"] = torch.cuda.get_device_name(device)
+        write_log(f"GPU: {report['torch_gpu_name']}")
 
-        for gpu in gpus:
-            try:
-                tf.config.experimental.set_memory_growth(gpu, True)
-            except RuntimeError as exc:
-                write_log(f"Memory growth not set: {exc}")
+        result = torch.ones((128, 128), device=device) @ torch.ones((128, 128), device=device)
+        report["matmul_device"] = str(result.device)
+        report["matmul_ok"] = bool(result[0, 0].item() == 128.0)
+        write_log(f"GPU matrix multiply: {result.device}, ok={report['matmul_ok']}")
+        if not report["matmul_ok"]:
+            raise RuntimeError("Matrix multiply on GPU returned a wrong result")
 
-        tf.config.set_soft_device_placement(False)
-        with tf.device("/GPU:0"):
-            result = tf.linalg.matmul(tf.ones((128, 128)), tf.ones((128, 128)))
-        report["matmul_device"] = result.device
-        report["matmul_ok"] = result.shape == (128, 128)
-        write_log(f"GPU matrix multiply: {result.device}, shape={result.shape}")
-        if "GPU:0" not in result.device:
-            raise RuntimeError("Matrix multiply did not execute on GPU:0")
-
-        from tensorflow.keras.applications import MobileNetV2
-        model = MobileNetV2(weights=None, include_top=False, pooling="avg",
-                            input_shape=(224, 224, 3))
-        with tf.device("/GPU:0"):
-            output = model(tf.zeros((1, 224, 224, 3)), training=False)
+        model = get_cnn_model("mobilenetv2", weights=None, device=device)
+        output = embed_images(model, np.zeros((2, 224, 224, 3), dtype=np.uint8))
         report["mobilenetv2_output_shape"] = [int(x) for x in output.shape]
-        report["tensorflow_mobilenetv2_inference_ok"] = True
+        if output.shape != (2, 1280):
+            raise RuntimeError(f"Unexpected MobileNetV2 output shape {output.shape}")
+        report["torch_mobilenetv2_inference_ok"] = True
         report["status"] = "passed"
         write_log(f"MobileNetV2 inference passed, output shape={output.shape}")
     except Exception as exc:

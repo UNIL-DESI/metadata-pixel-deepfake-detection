@@ -4,8 +4,6 @@ from pathlib import Path
 import sys
 import yaml
 
-sys.modules['googleapiclient'] = None
-sys.modules['oauth2client'] = None
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
 from features.cnn_models import get_cnn_model
@@ -30,7 +28,8 @@ def main():
     model_name = cnn_config["model"]
     print(f"Loading {model_name}")
     
-    model = get_cnn_model(model_name)
+    model = get_cnn_model(model_name, weights=cnn_config.get("weights", "imagenet"))
+    print(f"Device: {next(model.parameters()).device}")
     input_dir = Path(cnn_config["input_dir"])
     output_dir = Path(cnn_config["output_dir"])
     output_dir.mkdir(parents=True, exist_ok=True)

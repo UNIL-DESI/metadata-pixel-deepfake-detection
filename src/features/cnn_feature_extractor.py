@@ -5,12 +5,7 @@ import pandas as pd
 from tqdm import tqdm
 import gc
 
-from tensorflow.keras.applications.mobilenet_v2 import (
-    preprocess_input as mobilenet_preprocess
-)
-from tensorflow.keras.applications.efficientnet import (
-    preprocess_input as efficientnet_preprocess
-)
+from features.cnn_models import embed_images
 
 def load_image(image_path, size=224):
     image = cv2.imread(str(image_path))
@@ -31,10 +26,9 @@ def extract_metadata(image_path):
             break
     return label, video_id, region, frame
 
-def process_and_save_batch(batch_images, batch_metadata, model, preprocess_func, output_csv, is_first_batch):
+def process_and_save_batch(batch_images, batch_metadata, model, output_csv, is_first_batch):
     """Helper function to predict and append a batch to disk."""
-    batch_array = preprocess_func(np.array(batch_images))
-    batch_features = model.predict(batch_array, verbose=0)
+    batch_features = embed_images(model, batch_images)
     
     batch_rows = []
     for meta, feature in zip(batch_metadata, batch_features):
@@ -54,18 +48,15 @@ def process_and_save_batch(batch_images, batch_metadata, model, preprocess_func,
     batch_df.to_csv(output_csv, mode='a', header=is_first_batch, index=False)
     
     # Force memory cleanup
-    del batch_rows, batch_df, batch_array, batch_features
-    # Do not clear the active model's Keras session between batches.
-    # Clearing here can disrupt performance/state; caller may clear after extraction.
+    del batch_rows, batch_df, batch_features
 
 def extract_features(model, image_paths, model_name, output_csv, image_size=224, batch_size=16):
-    if model_name.lower() == "mobilenetv2":
-        preprocess = mobilenet_preprocess
-    elif model_name.lower() == "efficientnetb0":
-        preprocess = efficientnet_preprocess
-    else:
-        raise ValueError("Unknown preprocessing method.")
+    """Write one row of pooled CNN features per image to output_csv.
 
+    model_name is kept for the call signature; preprocessing is the same
+    ImageNet normalisation for every torchvision backbone.
+    """
+    output_csv = Path(output_csv)
     # Ensure output file is empty before starting
     if output_csv.exists():
         output_csv.unlink()
@@ -85,7 +76,7 @@ def extract_features(model, image_paths, model_name, output_csv, image_size=224,
 
         if len(batch_images) == batch_size:
             process_and_save_batch(
-                batch_images, batch_metadata, model, preprocess, output_csv, is_first_batch
+                batch_images, batch_metadata, model, output_csv, is_first_batch
             )
             is_first_batch = False
             batch_images = []
@@ -94,5 +85,5 @@ def extract_features(model, image_paths, model_name, output_csv, image_size=224,
     # Process any remaining images
     if batch_images:
         process_and_save_batch(
-            batch_images, batch_metadata, model, preprocess, output_csv, is_first_batch
+            batch_images, batch_metadata, model, output_csv, is_first_batch
         )
