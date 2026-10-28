@@ -26,7 +26,7 @@ ALLOWED_WORKERS=isipol09
 #STAGES(supported)=metadata_within_dataset_analysis, metadata_bias_screening, cross_dataset_metadata, predict_dataset_origin, ablation_study, feature_analysis 
 #STAGES=all
 #STAGES=hybrid_hybrid_pilot_001
-STAGES=gpu_smoke_test
+STAGES=hybrid_hybrid_pilot_001
 
 # ── Docker ──
 # 25.06 matches isipol09's driver (575.57.08, CUDA 12.9). Changing the image
