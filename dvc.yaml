@@ -164,11 +164,16 @@ stages:
     - config/experiments/hybrid_001.yaml
     - scripts/run_hybrid_experiment.py
     - scripts/run_hybrid_metadata.py
+    - scripts/preprocess_metadata.py
     - src/preprocessing
     - src/features
+    - src/metadata
     - data/raw/Hybrid_Deepfake_Dataset
     outs:
-    - experiments/hybrid_001/artifacts
+    # persist: DVC keeps the folder between runs, so --resume can reuse
+    # the videos an interrupted run already processed.
+    - experiments/hybrid_001/artifacts:
+        persist: true
     metrics:
     - results/hybrid_001/metrics.json:
         cache: false
@@ -184,11 +189,16 @@ stages:
     - config/experiments/hybrid_pilot_001.yaml
     - scripts/run_hybrid_experiment.py
     - scripts/run_hybrid_metadata.py
+    - scripts/preprocess_metadata.py
     - src/preprocessing
     - src/features
+    - src/metadata
     - data/raw/Hybrid_Deepfake_Dataset
     outs:
-    - experiments/hybrid_pilot_001/artifacts
+    # persist: DVC keeps the folder between runs, so --resume can reuse
+    # the videos an interrupted run already processed.
+    - experiments/hybrid_pilot_001/artifacts:
+        persist: true
     metrics:
     - results/hybrid_pilot_001/metrics.json:
         cache: false
